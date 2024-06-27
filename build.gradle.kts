@@ -51,10 +51,6 @@ tasks {
         from("LICENSE") { rename { "${project.name}_${it}" } }
     }
 
-    remapJar {
-        addNestedDependencies = true
-    }
-
     withType<JavaCompile>().configureEach {
         options.release = 17
         options.encoding = "UTF-8"

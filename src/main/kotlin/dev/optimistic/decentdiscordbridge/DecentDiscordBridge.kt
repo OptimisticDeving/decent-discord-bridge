@@ -18,6 +18,7 @@ import dev.optimistic.decentdiscordbridge.filter.impl.NoOpFilterRenderer
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeDiscordSpecial
 import me.lucko.configurate.toml.TOMLConfigurationLoader
+import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.fabricmc.loader.api.FabricLoader
@@ -36,6 +37,7 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
     val urlGenerator: AbstractAvatarUrlGenerator
     private val allowedMentions: AllowedMentions
     private val webhook: JDAWebhookClient
+    private val jda: JDA
 
     init {
         val loader = FabricLoader.getInstance()
@@ -81,11 +83,11 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
             .buildJDA()
         logger.info("Webhook built!")
         logger.info("Logging into Discord...")
-        startClient(token = config.token, channelId = config.channelId)
+        jda = startClient(token = config.token, channelId = config.channelId)
         logger.info("Logged into Discord!")
     }
 
-    private fun startClient(token: String, channelId: Long) {
+    private fun startClient(token: String, channelId: Long): JDA {
         val jda = light(
             token,
             enableCoroutines = true,
@@ -106,6 +108,13 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
 
             playerManager.broadcast(DiscordMessageToMinecraftRenderer.render(message), false)
         }
+
+        return jda
+    }
+
+    fun shutdown() {
+        this.webhook.close()
+        this.jda.shutdownNow()
     }
 
     fun sendSystem(message: Text) {

@@ -38,12 +38,12 @@ dependencies {
 java {
     withSourcesJar()
 
-    targetCompatibility = JavaVersion.VERSION_21
-    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }
 
 tasks {
@@ -52,7 +52,7 @@ tasks {
     }
 
     withType<JavaCompile>().configureEach {
-        options.release = 21
+        options.release = 17
         options.encoding = "UTF-8"
     }
 

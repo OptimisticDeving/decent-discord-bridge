@@ -24,10 +24,13 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "broadcast(Lnet/minecraft/network/message/SignedMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/network/message/MessageType$Parameters;)V", at = @At("TAIL"))
     private void chatBroadcast(SignedMessage message, Predicate<ServerPlayerEntity> shouldSendFiltered, @Nullable ServerPlayerEntity sender, MessageType.Parameters params, CallbackInfo ci) {
-        if (sender == null)
-            return; // like, who cares?
+        final DecentDiscordBridge bridge = DecentDiscordBridge.Companion.expectBridge();
 
-        DecentDiscordBridge.Companion.expectBridge().sendPlayer(sender, message);
+        if (sender == null) {
+            bridge.sendSystem(params.applyChatDecoration(message.getContent()));
+        } else {
+            bridge.sendPlayer(sender, message);
+        }
     }
 
     @Inject(method = "broadcast(Lnet/minecraft/text/Text;Z)V", at = @At("TAIL"))

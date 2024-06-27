@@ -18,7 +18,7 @@ object DiscordMessageToMinecraftRenderer {
 
         return Text.translatable(
             "chat.type.text",
-            Text.literal(message.member?.effectiveName ?: message.author.effectiveName)
+            Text.literal((message.member?.effectiveName ?: message.author.effectiveName).escapeMinecraftSpecial())
                 .formatted(Formatting.ITALIC)
                 // TODO: Figure out why replies break this
                 .styled { it.withColor(message.member?.colorRaw ?: Role.DEFAULT_COLOR_RAW) },

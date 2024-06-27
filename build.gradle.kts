@@ -10,28 +10,28 @@ loom {
 group = "dev.optimistic"
 version = "1.0.0"
 
+val shaded: Configuration by configurations.creating
+
 dependencies {
     minecraft("com.mojang:minecraft:1.20.1")
     mappings("net.fabricmc:yarn:1.20.1+build.10:v2")
     modImplementation("net.fabricmc:fabric-loader:0.15.11")
     modImplementation("net.fabricmc:fabric-language-kotlin:1.11.0+kotlin.2.0.0")
 
-    // really wishing loom properly supported gradle kts right about now
-    for (coordinates in arrayOf(
-        // config
-        "org.spongepowered:configurate-core:4.1.2",
-        "org.spongepowered:configurate-extra-kotlin:4.1.2",
-        "me.lucko.configurate:configurate-toml:4.1",
-        // discord
-        "net.dv8tion:JDA:5.0.0-beta.24",
-        "club.minnced:jda-ktx:0.11.0-beta.20",
-        "club.minnced:discord-webhooks:0.8.4"
-    )) {
-        val split = coordinates.split(':')
-        if (split.size != 3)
-            throw IllegalArgumentException("invalid dependency coordinates, expected 3 groups but got ${split.size}")
+    // config
+    shaded("org.spongepowered:configurate-core:4.1.2")
+    shaded("org.spongepowered:configurate-extra-kotlin:4.1.2")
+    shaded("me.lucko.configurate:configurate-toml:4.1")
 
-        include(implementation(group = split[0], name = split[1], version = split[2]))
+    // discord
+    shaded("net.dv8tion:JDA:5.0.0-beta.24")
+    shaded("club.minnced:jda-ktx:0.11.0-beta.20")
+    shaded("club.minnced:discord-webhooks:0.8.4")
+}
+
+configurations {
+    compileClasspath {
+        extendsFrom(shaded)
     }
 }
 
@@ -51,6 +51,10 @@ tasks {
         from("LICENSE") { rename { "${project.name}_${it}" } }
     }
 
+    remapJar {
+        addNestedDependencies = true
+    }
+
     withType<JavaCompile>().configureEach {
         options.release = 17
         options.encoding = "UTF-8"
@@ -59,6 +63,15 @@ tasks {
     processResources {
         filesMatching("fabric.mod.json") {
             expand("version" to project.version)
+        }
+
+        dependsOn(shaded)
+
+        shaded.forEach {
+            from(zipTree(it)) {
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
+            }
         }
     }
 }

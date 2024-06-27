@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "decent-discord-bridge",
+  "version": "${version}",
+  "name": "Decent Discord Bridge",
+  "description": "An attempt at writing a decent Discord bridge for the Fabric ecosystem.",
+  "authors": [
+    "OptimisticDev"
+  ],
+  "contact": {
+    "homepage": "https://github.com/OptimisticDeving/decent-discord-bridge/",
+    "sources": "https://github.com/OptimisticDeving/decent-discord-bridge/",
+    "issues": "https://github.com/OptimisticDeving/decent-discord-bridge/issues"
+  },
+  "license": "MIT",
+  "environment": "server",
+  "mixins": [
+    "decent-discord-bridge.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "~1.20.1",
+    "java": ">=17"
+  }
+}

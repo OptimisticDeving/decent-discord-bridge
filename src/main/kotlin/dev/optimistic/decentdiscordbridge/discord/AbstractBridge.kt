@@ -7,7 +7,6 @@ import net.minecraft.text.Text
 
 interface AbstractBridge {
     fun generateAvatarUrl(profile: GameProfile): String
-
     fun sendSystem(message: Text)
     fun sendPlayer(player: ServerPlayerEntity, message: SignedMessage)
     fun shutdown()

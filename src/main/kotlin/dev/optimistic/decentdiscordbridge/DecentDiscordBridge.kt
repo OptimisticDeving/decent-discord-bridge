@@ -13,7 +13,6 @@ import java.nio.file.Files
 
 class DecentDiscordBridge(playerManager: PlayerManager) {
     private val logger = LoggerFactory.getLogger("decent-discord-bridge")
-    val impl: AbstractBridge
 
     init {
         val loader = FabricLoader.getInstance()
@@ -44,23 +43,19 @@ class DecentDiscordBridge(playerManager: PlayerManager) {
 
         logger.info("Config loaded.")
         if (config.canLoad()) {
-            impl = EnabledBridge(playerManager, config, seenUsersPath)
+            bridge = EnabledBridge(playerManager, config, seenUsersPath)
             logger.info("Bridge successfully loaded!")
         } else {
             logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             logger.error("! Token not set in the config. Discord bridge not loading. !")
             logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            impl = DisabledBridge
+            bridge = DisabledBridge
         }
     }
 
-    fun shutdown() {
-        impl.shutdown()
-    }
-
     companion object {
-        var bridge: DecentDiscordBridge? = null
+        lateinit var bridge: AbstractBridge
 
-        fun expectBridge() = bridge!!
+        fun isBridgeInitialized() = ::bridge.isInitialized
     }
 }

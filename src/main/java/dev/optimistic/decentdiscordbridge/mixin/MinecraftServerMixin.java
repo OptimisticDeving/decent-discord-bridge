@@ -1,6 +1,7 @@
 package dev.optimistic.decentdiscordbridge.mixin;
 
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
+import dev.optimistic.decentdiscordbridge.discord.AbstractBridge;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,10 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftServerMixin {
     @Inject(method = "shutdown", at = @At("TAIL"))
     private void shutdown(CallbackInfo ci) {
-        final DecentDiscordBridge bridge = DecentDiscordBridge.Companion.getBridge();
-        if (bridge == null)
-            return;
-
+        if (!DecentDiscordBridge.Companion.isBridgeInitialized()) return;
+        final AbstractBridge bridge = DecentDiscordBridge.Companion.getBridge();
         bridge.shutdown();
     }
 }

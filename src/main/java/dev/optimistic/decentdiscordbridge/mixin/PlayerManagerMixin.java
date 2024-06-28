@@ -1,6 +1,7 @@
 package dev.optimistic.decentdiscordbridge.mixin;
 
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
+import dev.optimistic.decentdiscordbridge.discord.AbstractBridge;
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.network.message.SignedMessage;
@@ -19,17 +20,17 @@ import java.util.function.Predicate;
 public abstract class PlayerManagerMixin {
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     private void init(CallbackInfo ci) {
-        DecentDiscordBridge.Companion.setBridge(new DecentDiscordBridge((PlayerManager) (Object) this));
+        new DecentDiscordBridge((PlayerManager) (Object) this);
     }
 
     @Inject(method = "broadcast(Lnet/minecraft/network/message/SignedMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/network/message/MessageType$Parameters;)V", at = @At("TAIL"))
     private void chatBroadcast(SignedMessage message, Predicate<ServerPlayerEntity> shouldSendFiltered, @Nullable ServerPlayerEntity sender, MessageType.Parameters params, CallbackInfo ci) {
-        final DecentDiscordBridge bridge = DecentDiscordBridge.Companion.expectBridge();
+        final AbstractBridge bridge = DecentDiscordBridge.Companion.getBridge();
 
         if (sender == null) {
-            bridge.getImpl().sendSystem(params.applyChatDecoration(message.getContent()));
+            bridge.sendSystem(params.applyChatDecoration(message.getContent()));
         } else {
-            bridge.getImpl().sendPlayer(sender, message);
+            bridge.sendPlayer(sender, message);
         }
     }
 
@@ -41,6 +42,6 @@ public abstract class PlayerManagerMixin {
         if (DiscordMessageToMinecraftRenderer.INSTANCE.isRenderedAndRemoveIfSo(message))
             return;
 
-        DecentDiscordBridge.Companion.expectBridge().getImpl().sendSystem(message);
+        DecentDiscordBridge.Companion.getBridge().sendSystem(message);
     }
 }

@@ -15,12 +15,17 @@ import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck
 import dev.optimistic.decentdiscordbridge.filter.FilterRenderer
 import dev.optimistic.decentdiscordbridge.filter.impl.AppliedFilterRenderer
 import dev.optimistic.decentdiscordbridge.filter.impl.NoOpFilterRenderer
+import dev.optimistic.decentdiscordbridge.mention.AbstractMentionResolver
+import dev.optimistic.decentdiscordbridge.mention.impl.DisabledMentionResolver
+import dev.optimistic.decentdiscordbridge.mention.impl.EnabledMentionResolver
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeDiscordSpecial
 import me.lucko.configurate.toml.TOMLConfigurationLoader
 import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
+import net.dv8tion.jda.api.utils.MemberCachePolicy
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.message.SignedMessage
 import net.minecraft.server.PlayerManager
@@ -38,6 +43,7 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
     private val allowedMentions: AllowedMentions
     private val webhook: JDAWebhookClient
     private val jda: JDA
+    private val mentionResolver: AbstractMentionResolver
 
     init {
         val loader = FabricLoader.getInstance()
@@ -83,16 +89,25 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
             .buildJDA()
         logger.info("Webhook built!")
         logger.info("Logging into Discord...")
-        jda = startClient(token = config.token, channelId = config.channelId)
+        val (jda, guild) = startClient(token = config.token, channelId = config.channelId)
+        this.jda = jda
+
+        mentionResolver = if (config.mentions.users.allowed) {
+            EnabledMentionResolver(guild, mentionFilter = config.mentions.users.asMentionFilter())
+        } else {
+            DisabledMentionResolver
+        }
+
         logger.info("Logged into Discord!")
     }
 
-    private fun startClient(token: String, channelId: Long): JDA {
+    private fun startClient(token: String, channelId: Long): Pair<JDA, Guild> {
         val jda = light(
             token,
             enableCoroutines = true,
         ) {
             enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
+            setMemberCachePolicy(MemberCachePolicy.ALL)
         }
 
         jda.listener<MessageReceivedEvent> {
@@ -109,7 +124,8 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
             playerManager.broadcast(DiscordMessageToMinecraftRenderer.render(message), false)
         }
 
-        return jda
+        jda.awaitReady()
+        return Pair(jda, jda.getGuildChannelById(channelId)!!.guild)
     }
 
     fun shutdown() {
@@ -136,7 +152,10 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
             WebhookMessageBuilder()
                 .setUsername(player.gameProfile.name)
                 .setAvatarUrl((player as CachedAvatarUrlDuck).getAvatarUrl())
-                .setContent(filtered.escapeDiscordSpecial())
+                .setContent(
+                    mentionResolver.resolveMentionsInString(filtered)
+                        .escapeDiscordSpecial()
+                )
                 .setAllowedMentions(this.allowedMentions)
                 .build()
         )

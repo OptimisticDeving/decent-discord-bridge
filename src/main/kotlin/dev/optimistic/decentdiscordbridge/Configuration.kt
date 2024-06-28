@@ -1,6 +1,8 @@
 package dev.optimistic.decentdiscordbridge
 
 import club.minnced.discord.webhook.send.AllowedMentions
+import dev.optimistic.decentdiscordbridge.mention.filter.impl.PassthroughMentionFilter
+import dev.optimistic.decentdiscordbridge.mention.filter.impl.RestrictedMentionFilter
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
@@ -51,6 +53,12 @@ data class Configuration(
                 }
 
                 return allowedMentions
+            }
+
+            fun asMentionFilter() = if (only.isEmpty()) {
+                PassthroughMentionFilter
+            } else {
+                RestrictedMentionFilter(only)
             }
         }
 

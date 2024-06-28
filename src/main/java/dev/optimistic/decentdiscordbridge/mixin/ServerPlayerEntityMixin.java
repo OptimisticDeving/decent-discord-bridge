@@ -19,8 +19,7 @@ public abstract class ServerPlayerEntityMixin implements CachedAvatarUrlDuck {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init(MinecraftServer server, ServerWorld world, GameProfile profile, CallbackInfo ci) {
-        this.avatarUrl = DecentDiscordBridge.Companion.expectBridge()
-                .getUrlGenerator()
+        this.avatarUrl = DecentDiscordBridge.Companion.getBridge()
                 .generateAvatarUrl(profile);
     }
 

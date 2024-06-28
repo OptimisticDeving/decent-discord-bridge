@@ -5,7 +5,7 @@ import dev.optimistic.decentdiscordbridge.mention.filter.MentionFilter
 import net.dv8tion.jda.api.entities.Guild
 
 class EnabledMentionResolver(private val guild: Guild, private val mentionFilter: MentionFilter) :
-    AbstractMentionResolver() {
+    AbstractMentionResolver {
     private fun resolveMention(name: String): String? {
         val lowercaseName = name.lowercase()
 

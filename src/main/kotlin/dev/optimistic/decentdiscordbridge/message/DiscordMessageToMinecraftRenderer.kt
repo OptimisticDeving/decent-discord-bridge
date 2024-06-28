@@ -7,12 +7,15 @@ import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.Role
 import net.minecraft.screen.ScreenTexts
+import net.minecraft.text.ClickEvent
+import net.minecraft.text.HoverEvent
 import net.minecraft.text.Text
 import net.minecraft.text.Texts
 import net.minecraft.util.Formatting
 
 object DiscordMessageToMinecraftRenderer {
     private val renderedMessages = arrayListOf<Text>()
+    private val suggestMention = Text.literal("Click to copy a mention for this user to your clipboard.")
 
     private fun renderContent(message: Message, attachmentSeparator: Text, memberOverride: Member? = null): Text {
         val content = message.contentDisplay.escapeMinecraftSpecial();
@@ -22,8 +25,11 @@ object DiscordMessageToMinecraftRenderer {
             "chat.type.text",
             Text.literal((member?.effectiveName ?: message.author.effectiveName).escapeMinecraftSpecial())
                 .formatted(Formatting.ITALIC)
-                // TODO: Figure out why replies break this
-                .styled { it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW) },
+                .styled {
+                    it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW)
+                        .withHoverEvent(HoverEvent.Action.SHOW_TEXT.buildHoverEvent(suggestMention))
+                        .withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, message.author.asMention))
+                },
             Text.literal(content).run {
                 if (message.attachments.isEmpty())
                     return@run this
@@ -53,7 +59,9 @@ object DiscordMessageToMinecraftRenderer {
                         renderContent(
                             message = reply,
                             attachmentSeparator = ScreenTexts.SPACE,
-                            memberOverride = reply.guild.retrieveMember(reply.author).complete(true)
+                            memberOverride = if (!reply.isWebhookMessage)
+                                reply.guild.retrieveMember(reply.author)
+                                    .complete(true) else null
                         )
                     )
                     .append(ScreenTexts.LINE_BREAK)

@@ -59,9 +59,8 @@ object DiscordMessageToMinecraftRenderer {
                         renderContent(
                             message = reply,
                             attachmentSeparator = ScreenTexts.SPACE,
-                            memberOverride = if (!reply.isWebhookMessage)
-                                reply.guild.retrieveMember(reply.author)
-                                    .complete(true) else null
+                            memberOverride = reply.guild.retrieveMember(reply.author)
+                                .onErrorMap { null }.complete()
                         )
                     )
                     .append(ScreenTexts.LINE_BREAK)

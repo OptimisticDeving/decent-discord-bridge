@@ -182,9 +182,12 @@ class DecentDiscordBridge(private val playerManager: PlayerManager) {
     }
 
     fun sendPlayer(player: ServerPlayerEntity, message: SignedMessage) {
-        val filtered = this.filter.renderFilter(message)
+        val filtered = this.filter.renderFilter(message)?.trim()
         if (filtered === null)
             return // don't send fully filtered messages over the discord bridge
+
+        if (filtered.isEmpty())
+            return
 
         webhook.send(
             WebhookMessageBuilder()

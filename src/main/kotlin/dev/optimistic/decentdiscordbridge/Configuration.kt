@@ -7,14 +7,19 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
 data class Configuration(
-    val token: String,
-    val channelId: Long,
-    val webhookId: Long,
-    val webhookToken: String,
-    val playerAvatars: AvatarConfiguration,
+    val token: String = "",
+    val channelId: Long = -1,
+    val webhookId: Long = -1,
+    val webhookToken: String = "",
+    val playerAvatars: AvatarConfiguration = AvatarConfiguration(),
     val applyFilterToWebhookMessages: Boolean = false,
-    val mentions: MentionConfiguration,
+    val mentions: MentionConfiguration = MentionConfiguration(),
 ) {
+    fun canLoad(): Boolean {
+        return this.token.isNotBlank() && this.channelId != -1L
+                && this.webhookToken.isNotBlank() && this.webhookId != -1L
+    }
+
     @ConfigSerializable
     data class AvatarConfiguration(
         val templateType: TemplateType = TemplateType.UNDASHED_UUID,

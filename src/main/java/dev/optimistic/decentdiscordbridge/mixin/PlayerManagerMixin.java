@@ -27,9 +27,9 @@ public abstract class PlayerManagerMixin {
         final DecentDiscordBridge bridge = DecentDiscordBridge.Companion.expectBridge();
 
         if (sender == null) {
-            bridge.sendSystem(params.applyChatDecoration(message.getContent()));
+            bridge.getImpl().sendSystem(params.applyChatDecoration(message.getContent()));
         } else {
-            bridge.sendPlayer(sender, message);
+            bridge.getImpl().sendPlayer(sender, message);
         }
     }
 
@@ -41,6 +41,6 @@ public abstract class PlayerManagerMixin {
         if (DiscordMessageToMinecraftRenderer.INSTANCE.isRenderedAndRemoveIfSo(message))
             return;
 
-        DecentDiscordBridge.Companion.expectBridge().sendSystem(message);
+        DecentDiscordBridge.Companion.expectBridge().getImpl().sendSystem(message);
     }
 }

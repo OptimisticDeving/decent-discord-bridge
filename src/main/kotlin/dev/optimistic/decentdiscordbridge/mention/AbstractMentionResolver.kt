@@ -1,5 +1,5 @@
 package dev.optimistic.decentdiscordbridge.mention
 
-abstract class AbstractMentionResolver {
-    abstract fun resolveMentionsInString(input: String): String
+interface AbstractMentionResolver {
+    fun resolveMentionsInString(input: String): String
 }

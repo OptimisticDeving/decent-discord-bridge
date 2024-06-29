@@ -12,8 +12,6 @@ import org.spongepowered.configurate.kotlin.objectMapperFactory
 import java.nio.file.Files
 
 class DecentDiscordBridge(playerManager: PlayerManager) {
-    private val logger = LoggerFactory.getLogger("decent-discord-bridge")
-
     init {
         val loader = FabricLoader.getInstance()
         val configSubpath = loader.configDir.resolve("decent-discord-bridge")
@@ -53,6 +51,7 @@ class DecentDiscordBridge(playerManager: PlayerManager) {
     }
 
     companion object {
+        val logger = LoggerFactory.getLogger("decent-discord-bridge")
         lateinit var bridge: AbstractBridge
 
         fun isBridgeInitialized() = ::bridge.isInitialized

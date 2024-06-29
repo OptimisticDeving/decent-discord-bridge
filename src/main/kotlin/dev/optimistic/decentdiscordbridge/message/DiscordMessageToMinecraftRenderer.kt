@@ -17,8 +17,13 @@ object DiscordMessageToMinecraftRenderer {
     private val renderedMessages = arrayListOf<Text>()
     private val suggestMention = Text.literal("Click to copy a mention for this user to your clipboard.")
 
-    private fun renderContent(message: Message, attachmentSeparator: Text, memberOverride: Member? = null): Text {
-        val content = message.contentDisplay.escapeMinecraftSpecial();
+    private fun renderContent(
+        message: Message,
+        attachmentSeparator: Text,
+        memberOverride: Member? = null,
+        contentOverride: String? = null
+    ): Text {
+        val content = (contentOverride ?: message.contentDisplay).escapeMinecraftSpecial();
         val member = memberOverride ?: message.member
 
         return Text.translatable(
@@ -47,7 +52,7 @@ object DiscordMessageToMinecraftRenderer {
     }
 
 
-    fun render(message: Message): Text {
+    fun render(message: Message, content: String): Text {
         val reply = message.referencedMessage
         val component = Text.empty()
 
@@ -67,7 +72,13 @@ object DiscordMessageToMinecraftRenderer {
             )
         }
 
-        component.append(renderContent(message, attachmentSeparator = ScreenTexts.LINE_BREAK))
+        component.append(
+            renderContent(
+                message,
+                attachmentSeparator = ScreenTexts.LINE_BREAK,
+                contentOverride = content
+            )
+        )
 
         synchronized(renderedMessages) {
             renderedMessages.add(component)

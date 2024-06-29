@@ -1,7 +1,7 @@
 package dev.optimistic.decentdiscordbridge.mixin;
 
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
-import dev.optimistic.decentdiscordbridge.discord.AbstractBridge;
+import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge;
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.network.message.SignedMessage;

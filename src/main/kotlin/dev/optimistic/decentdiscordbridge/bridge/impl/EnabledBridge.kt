@@ -1,4 +1,4 @@
-package dev.optimistic.decentdiscordbridge.discord.impl
+package dev.optimistic.decentdiscordbridge.bridge.impl
 
 import club.minnced.discord.webhook.WebhookClientBuilder
 import club.minnced.discord.webhook.external.JDAWebhookClient
@@ -15,7 +15,7 @@ import dev.optimistic.decentdiscordbridge.avatars.AbstractAvatarUrlGenerator
 import dev.optimistic.decentdiscordbridge.avatars.impl.DashedUuidArgumentUrlGenerator
 import dev.optimistic.decentdiscordbridge.avatars.impl.UndashedUuidArgumentUrlGenerator
 import dev.optimistic.decentdiscordbridge.avatars.impl.UsernameArgumentUrlGenerator
-import dev.optimistic.decentdiscordbridge.discord.AbstractBridge
+import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge
 import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck
 import dev.optimistic.decentdiscordbridge.filter.FilterRenderer
 import dev.optimistic.decentdiscordbridge.filter.impl.AppliedFilterRenderer

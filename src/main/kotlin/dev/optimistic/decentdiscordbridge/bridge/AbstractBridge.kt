@@ -1,4 +1,4 @@
-package dev.optimistic.decentdiscordbridge.discord
+package dev.optimistic.decentdiscordbridge.bridge
 
 import com.mojang.authlib.GameProfile
 import net.minecraft.network.message.SignedMessage

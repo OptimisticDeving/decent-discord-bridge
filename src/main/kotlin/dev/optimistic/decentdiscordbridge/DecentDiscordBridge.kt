@@ -1,8 +1,8 @@
 package dev.optimistic.decentdiscordbridge
 
-import dev.optimistic.decentdiscordbridge.discord.AbstractBridge
-import dev.optimistic.decentdiscordbridge.discord.impl.DisabledBridge
-import dev.optimistic.decentdiscordbridge.discord.impl.EnabledBridge
+import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge
+import dev.optimistic.decentdiscordbridge.bridge.impl.DisabledBridge
+import dev.optimistic.decentdiscordbridge.bridge.impl.EnabledBridge
 import me.lucko.configurate.toml.TOMLConfigurationLoader
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.server.PlayerManager

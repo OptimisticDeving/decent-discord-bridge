@@ -1,7 +1,7 @@
-package dev.optimistic.decentdiscordbridge.discord.impl
+package dev.optimistic.decentdiscordbridge.bridge.impl
 
 import com.mojang.authlib.GameProfile
-import dev.optimistic.decentdiscordbridge.discord.AbstractBridge
+import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge
 import net.minecraft.network.message.SignedMessage
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text

@@ -20,10 +20,13 @@ import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck
 import dev.optimistic.decentdiscordbridge.filter.FilterRenderer
 import dev.optimistic.decentdiscordbridge.filter.impl.AppliedFilterRenderer
 import dev.optimistic.decentdiscordbridge.filter.impl.NoOpFilterRenderer
+import dev.optimistic.decentdiscordbridge.link.impl.DisabledLinkResolver
+import dev.optimistic.decentdiscordbridge.link.impl.EnabledLinkResolver
 import dev.optimistic.decentdiscordbridge.mention.AbstractMentionResolver
 import dev.optimistic.decentdiscordbridge.mention.impl.DisabledMentionResolver
 import dev.optimistic.decentdiscordbridge.mention.impl.EnabledMentionResolver
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer
+import dev.optimistic.decentdiscordbridge.message.impl.EnabledDiscordMessageToMinecraftRenderer
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeDiscordSpecial
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
@@ -44,7 +47,7 @@ class EnabledBridge(
     private val playerManager: PlayerManager,
     config: Configuration,
     private val seenUsersPath: Path
-) : AbstractBridge {
+) : AbstractBridge() {
     private val logger = LoggerFactory.getLogger("decent-discord-bridge")
 
     private val allowedMentions: AllowedMentions = config.mentions.intoJda()
@@ -66,6 +69,8 @@ class EnabledBridge(
     else
         gson.fromJson(Files.newBufferedReader(seenUsersPath), object : TypeToken<MutableSet<Long>>() {})
 
+    override val messageRenderer: DiscordMessageToMinecraftRenderer
+
     init {
         logger.info("Building webhook...")
         webhook = WebhookClientBuilder(config.webhookId, config.webhookToken)
@@ -82,6 +87,13 @@ class EnabledBridge(
             DisabledMentionResolver
         }
 
+        val linkResolver = if (config.resolveLinks) {
+            EnabledLinkResolver
+        } else {
+            DisabledLinkResolver
+        }
+
+        messageRenderer = EnabledDiscordMessageToMinecraftRenderer(linkResolver)
         loadCache(guild)
     }
 
@@ -111,7 +123,7 @@ class EnabledBridge(
             if (message.isWebhookMessage || content.isEmpty())
                 return@listener
 
-            playerManager.broadcast(DiscordMessageToMinecraftRenderer.render(message, content), false)
+            playerManager.broadcast(messageRenderer.render(message, content), false)
         }
 
         jda.awaitReady()

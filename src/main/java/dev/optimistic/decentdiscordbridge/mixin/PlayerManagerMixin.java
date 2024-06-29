@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
 import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge;
 import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck;
-import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer;
 import net.minecraft.network.message.MessageType;
 import net.minecraft.network.message.SignedMessage;
 import net.minecraft.server.PlayerManager;
@@ -47,7 +46,10 @@ public abstract class PlayerManagerMixin {
         if (overlay)
             return; // again, who cares?
 
-        if (DiscordMessageToMinecraftRenderer.INSTANCE.isRenderedAndRemoveIfSo(message))
+        if (DecentDiscordBridge.Companion
+                .getBridge()
+                .getMessageRenderer()
+                .isRenderedAndRemoveIfSo(message))
             return;
 
         DecentDiscordBridge.Companion.getBridge().sendSystem(message);

@@ -15,6 +15,7 @@ data class Configuration(
     val applyFilterToWebhookMessages: Boolean = false,
     val mentions: MentionConfiguration = MentionConfiguration(),
     val resolveLinks: Boolean = true,
+    val broadcastLifecycleEvents: Boolean = false,
 ) {
     fun shouldLoad(): Boolean {
         return this.token.isNotBlank() && this.channelId != -1L

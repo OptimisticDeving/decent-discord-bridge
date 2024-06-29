@@ -2,6 +2,7 @@ package dev.optimistic.decentdiscordbridge.bridge.impl
 
 import club.minnced.discord.webhook.WebhookClientBuilder
 import club.minnced.discord.webhook.external.JDAWebhookClient
+import club.minnced.discord.webhook.receive.ReadonlyMessage
 import club.minnced.discord.webhook.send.AllowedMentions
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.google.gson.Gson
@@ -42,6 +43,8 @@ import net.minecraft.text.Text
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 
 class EnabledBridge(
     private val playerManager: PlayerManager,
@@ -68,6 +71,7 @@ class EnabledBridge(
         mutableSetOf()
     else
         gson.fromJson(Files.newBufferedReader(seenUsersPath), object : TypeToken<MutableSet<Long>>() {})
+    private val broadcastLifecycleEvents: Boolean
 
     override val messageRenderer: DiscordMessageToMinecraftRenderer
 
@@ -94,6 +98,8 @@ class EnabledBridge(
         }
 
         messageRenderer = EnabledDiscordMessageToMinecraftRenderer(linkResolver)
+        broadcastLifecycleEvents = config.broadcastLifecycleEvents
+
         loadCache(guild)
     }
 
@@ -150,25 +156,31 @@ class EnabledBridge(
         return urlGenerator.generateAvatarUrl(profile)
     }
 
+    private fun sendSystemInternal(message: Text) = webhook.send(
+        WebhookMessageBuilder()
+            .setUsername("System")
+            .setContent(message.string.escapeDiscordSpecial())
+            .setAllowedMentions(emptyMentions)
+            .build()
+    )
+
+
     override fun sendSystem(message: Text) {
-        webhook.send(
-            WebhookMessageBuilder()
-                .setUsername("System")
-                .setContent(message.string.escapeDiscordSpecial())
-                .setAllowedMentions(emptyMentions)
-                .build()
-        )
+        sendSystemInternal(message)
     }
 
-    override fun sendPlayer(player: ServerPlayerEntity, message: SignedMessage) {
+    private fun sendPlayerInternal(
+        player: ServerPlayerEntity,
+        message: SignedMessage
+    ): CompletableFuture<ReadonlyMessage> {
         val filtered = this.filter.renderFilter(message)?.trim()
         if (filtered === null)
-            return // don't send fully filtered messages over the discord bridge
+            return completelyFiltered // don't send fully filtered messages over the discord bridge
 
         if (filtered.isEmpty())
-            return
+            return emptyMessage
 
-        webhook.send(
+        return webhook.send(
             WebhookMessageBuilder()
                 .setUsername(player.gameProfile.name)
                 .setAvatarUrl((player as CachedAvatarUrlDuck).getAvatarUrl())
@@ -181,9 +193,29 @@ class EnabledBridge(
         )
     }
 
-    override fun shutdown() {
+    override fun sendPlayer(player: ServerPlayerEntity, message: SignedMessage) {
+        sendPlayerInternal(player, message)
+    }
+
+    override fun onStartup() {
+        if (!broadcastLifecycleEvents)
+            return
+
+        sendSystem(Text.literal("Server has started"))
+    }
+
+    override fun onShutdown() {
+        jda.shutdown()
+        jda.awaitShutdown(30, TimeUnit.SECONDS)
+        if (broadcastLifecycleEvents) {
+            try {
+                sendSystemInternal(Text.literal("Server has stopped")).get(15, TimeUnit.SECONDS)
+            } catch (ex: Throwable) {
+                logger.warn("Failed to send shutdown message", ex)
+            }
+        }
+
         webhook.close()
-        jda.shutdownNow()
 
         val writer = Files.newBufferedWriter(seenUsersPath)
         synchronized(seenUsers) {
@@ -192,8 +224,13 @@ class EnabledBridge(
         writer.flush()
     }
 
-    companion object {
+    private companion object {
         private val emptyMentions = AllowedMentions.none()
         private val gson = Gson()
+
+        private val completelyFiltered =
+            CompletableFuture.failedFuture<ReadonlyMessage>(IllegalArgumentException("completely filtered message"))
+        private val emptyMessage =
+            CompletableFuture.failedFuture<ReadonlyMessage>(IllegalArgumentException("empty message"))
     }
 }

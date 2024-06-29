@@ -12,5 +12,6 @@ abstract class AbstractBridge {
     abstract fun generateAvatarUrl(profile: GameProfile): String
     abstract fun sendSystem(message: Text)
     abstract fun sendPlayer(player: ServerPlayerEntity, message: SignedMessage)
-    abstract fun shutdown()
+    abstract fun onStartup()
+    abstract fun onShutdown()
 }

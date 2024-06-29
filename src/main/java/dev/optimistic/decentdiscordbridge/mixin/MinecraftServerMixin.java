@@ -14,6 +14,6 @@ public abstract class MinecraftServerMixin {
     private void shutdown(CallbackInfo ci) {
         if (!DecentDiscordBridge.Companion.isBridgeInitialized()) return;
         final AbstractBridge bridge = DecentDiscordBridge.Companion.getBridge();
-        bridge.shutdown();
+        bridge.onShutdown();
     }
 }

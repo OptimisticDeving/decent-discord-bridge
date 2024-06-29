@@ -14,5 +14,6 @@ object DisabledBridge : AbstractBridge() {
     override fun generateAvatarUrl(profile: GameProfile): String = ""
     override fun sendSystem(message: Text) {}
     override fun sendPlayer(player: ServerPlayerEntity, message: SignedMessage) {}
-    override fun shutdown() {}
+    override fun onStartup() {}
+    override fun onShutdown() {}
 }

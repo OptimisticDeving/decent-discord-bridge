@@ -39,10 +39,9 @@ class DecentDiscordBridge(playerManager: PlayerManager) {
         rootNode.set(config)
         configLoader.save(rootNode) // toml config loader doesn't really do proper equal checks, so this would happen anyway if we compared states
 
-        val seenUsersPath = configSubpath.resolve("seen_users.json")
-
         logger.info("Config loaded.")
         if (config.canLoad()) {
+            val seenUsersPath = configSubpath.resolve("seen_users.json")
             bridge = EnabledBridge(playerManager, config, seenUsersPath)
             logger.info("Bridge successfully loaded!")
         } else {

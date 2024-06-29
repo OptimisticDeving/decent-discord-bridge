@@ -107,7 +107,7 @@ class EnabledBridge(
                 return@listener
 
             val message = it.message
-            if (message.isWebhookMessage)
+            if (message.isWebhookMessage || message.contentDisplay.isEmpty())
                 return@listener
 
             playerManager.broadcast(DiscordMessageToMinecraftRenderer.render(message), false)

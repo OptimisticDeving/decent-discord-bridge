@@ -120,7 +120,7 @@ class EnabledBridge(
 
             val message = it.message
             val content = message.contentDisplay
-            if (message.isWebhookMessage || content.isEmpty())
+            if (message.isWebhookMessage || !(content.isNotEmpty() || message.attachments.isNotEmpty()))
                 return@listener
 
             playerManager.broadcast(messageRenderer.render(message, content), false)

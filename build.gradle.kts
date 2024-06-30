@@ -35,7 +35,9 @@ dependencies {
     jij("net.dv8tion:JDA:5.0.0-beta.24") {
         exclude(module = "opus-java")
     }
-    jij("club.minnced:jda-ktx:0.11.0-beta.20")
+    jij("club.minnced:jda-ktx:0.11.0-beta.20") {
+        exclude(module = "JDA")
+    }
     jij("club.minnced:discord-webhooks:0.8.4")
 }
 

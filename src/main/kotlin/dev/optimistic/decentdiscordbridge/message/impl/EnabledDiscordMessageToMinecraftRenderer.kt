@@ -1,6 +1,6 @@
 package dev.optimistic.decentdiscordbridge.message.impl
 
-import dev.optimistic.decentdiscordbridge.link.LinkResolver
+import dev.optimistic.decentdiscordbridge.link.AbstractLinkResolver
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer
 import dev.optimistic.decentdiscordbridge.util.AttachmentExtensions.asText
 import dev.optimistic.decentdiscordbridge.util.MessageExtensions.hasContent
@@ -16,7 +16,7 @@ import net.minecraft.text.Text
 import net.minecraft.text.Texts
 import net.minecraft.util.Formatting
 
-class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: LinkResolver) :
+class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: AbstractLinkResolver) :
     DiscordMessageToMinecraftRenderer {
     private val renderedMessages = arrayListOf<Text>()
     private val suggestMention = Text.literal("Click to copy a mention for this user to your clipboard.")

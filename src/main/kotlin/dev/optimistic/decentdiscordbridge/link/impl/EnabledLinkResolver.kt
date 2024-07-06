@@ -1,14 +1,15 @@
 package dev.optimistic.decentdiscordbridge.link.impl
 
-import dev.optimistic.decentdiscordbridge.link.LinkResolver
+import dev.optimistic.decentdiscordbridge.link.AbstractLinkResolver
 import dev.optimistic.decentdiscordbridge.text.DelimiterBasedStringTextConversion
 import dev.optimistic.decentdiscordbridge.text.StringToTextConversion
+import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeDiscordSpecial
 import net.minecraft.text.ClickEvent
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 
-object EnabledLinkResolver : LinkResolver(), StringToTextConversion {
+object EnabledLinkResolver : AbstractLinkResolver(), StringToTextConversion {
     private val linkRegex =
         Regex(
             "https?://[\\w-]{2,}(?:\\.[\\w-]+)*\\.?(?::\\d+)?(?:/.*)?",
@@ -38,4 +39,22 @@ object EnabledLinkResolver : LinkResolver(), StringToTextConversion {
     }
 
     override val delimitedConversion: DelimiterBasedStringTextConversion = createDelimConversion(this)
+
+    override fun escapeNotLinks(input: String): String {
+        val matches = linkRegex.findAll(input)
+        if (matches.none())
+            return input.escapeDiscordSpecial()
+
+        val stringBuilder = StringBuilder()
+        for ((idx, match) in matches.withIndex()) {
+            if (idx == 0) {
+                val before = match.range.first
+                if (before > 0) stringBuilder.append(input.substring(0, before).escapeDiscordSpecial())
+            }
+
+            stringBuilder.append(match.value)
+        }
+
+        return stringBuilder.toString()
+    }
 }

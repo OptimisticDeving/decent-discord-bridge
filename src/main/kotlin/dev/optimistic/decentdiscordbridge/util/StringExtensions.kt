@@ -1,7 +1,8 @@
 package dev.optimistic.decentdiscordbridge.util
 
 object StringExtensions {
-    private const val SPECIAL_CHARACTER_TEMPLATE = "([*_#\\[(\\-`|\\\\]|(?<!<@\\d{17,50})>)"
+    private const val SPECIAL_CHARACTER_TEMPLATE =
+        "([*#\\[(\\-`|\\\\]|(?<!:\\w{1,32})_(?!\\w+:)|(?<!<@\\d{17,50})>)"
     private val specialCharacterRegex = Regex(SPECIAL_CHARACTER_TEMPLATE)
     private val specialCharacterEscapeRegex = Regex("\\\\$SPECIAL_CHARACTER_TEMPLATE")
     private val nonChat = Regex("[^\\p{L}\\p{N}\\p{P}\\p{S}\\p{Z}]")

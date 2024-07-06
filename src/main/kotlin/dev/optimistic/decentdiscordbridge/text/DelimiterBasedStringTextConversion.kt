@@ -8,8 +8,8 @@ class DelimiterBasedStringTextConversion(private val delim: String, private val 
     StringToTextConversion {
     private val delimComponent = Text.literal(delim)
 
-    override fun convert(input: String): MutableText {
+    override fun convert(input: String, escapedLiteralFactory: (String) -> MutableText): MutableText {
         val split = input.split(delim)
-        return Texts.join(split.map { conversion.convert(it) }, delimComponent).copy()
+        return Texts.join(split.map { conversion.convert(it, escapedLiteralFactory) }, delimComponent).copy()
     }
 }

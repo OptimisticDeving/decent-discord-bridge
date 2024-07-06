@@ -32,7 +32,9 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: LinkRes
 
         return Text.translatable(
             "chat.type.text",
-            Text.literal((member?.effectiveName ?: message.author.effectiveName).escapeMinecraftSpecial())
+            Text.literal(
+                (member?.effectiveName ?: message.author.effectiveName).escapeMinecraftSpecial()
+            )
                 .formatted(Formatting.ITALIC)
                 .styled {
                     it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW)

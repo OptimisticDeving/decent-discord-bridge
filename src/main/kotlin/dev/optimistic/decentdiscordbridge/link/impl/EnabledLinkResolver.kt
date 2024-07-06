@@ -15,16 +15,16 @@ object EnabledLinkResolver : LinkResolver(), StringToTextConversion {
             RegexOption.IGNORE_CASE,
         )
 
-    override fun convert(input: String): MutableText {
+    override fun convert(input: String, escapedLiteralFactory: (String) -> MutableText): MutableText {
         val matches = linkRegex.findAll(input)
         if (matches.none())
-            return Text.literal(input)
+            return escapedLiteralFactory(input)
         val component = Text.empty()
 
         for ((idx, match) in matches.withIndex()) {
             if (idx == 0) {
                 val before = match.range.first
-                if (before > 0) component.append(Text.literal(input.substring(0, before)))
+                if (before > 0) component.append(escapedLiteralFactory(input.substring(0, before)))
             }
 
             component.append(

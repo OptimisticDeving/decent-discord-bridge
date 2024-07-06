@@ -16,15 +16,24 @@ object EnabledLinkResolver : LinkResolver(), StringToTextConversion {
         )
 
     override fun convert(input: String): MutableText {
-        val match = linkRegex.find(input) ?: return Text.literal(input)
+        val matches = linkRegex.findAll(input)
+        if (matches.none())
+            return Text.literal(input)
         val component = Text.empty()
-        val before = match.range.first
-        if (before > 0) component.append(Text.literal(input.substring(0, before)))
-        component.append(
-            Text.literal(match.value)
-                .formatted(Formatting.BLUE)
-                .styled { it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, match.value)) }
-        )
+
+        for ((idx, match) in matches.withIndex()) {
+            if (idx == 0) {
+                val before = match.range.first
+                if (before > 0) component.append(Text.literal(input.substring(0, before)))
+            }
+
+            component.append(
+                Text.literal(match.value)
+                    .formatted(Formatting.BLUE)
+                    .styled { it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, match.value)) }
+            )
+        }
+
         return component
     }
 

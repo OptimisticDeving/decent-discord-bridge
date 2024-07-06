@@ -28,6 +28,7 @@ import dev.optimistic.decentdiscordbridge.mention.impl.DisabledMentionResolver
 import dev.optimistic.decentdiscordbridge.mention.impl.EnabledMentionResolver
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer
 import dev.optimistic.decentdiscordbridge.message.impl.EnabledDiscordMessageToMinecraftRenderer
+import dev.optimistic.decentdiscordbridge.util.MessageExtensions.hasContent
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeDiscordSpecial
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
@@ -126,7 +127,7 @@ class EnabledBridge(
 
             val message = it.message
             val content = message.contentDisplay
-            if (message.isWebhookMessage || !(content.isNotEmpty() || message.attachments.isNotEmpty()))
+            if (message.isWebhookMessage || !message.hasContent())
                 return@listener
 
             playerManager.broadcast(messageRenderer.render(message, content), false)

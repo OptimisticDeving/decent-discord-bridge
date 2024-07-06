@@ -4,6 +4,7 @@ import dev.optimistic.decentdiscordbridge.link.LinkResolver
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer
 import dev.optimistic.decentdiscordbridge.util.AttachmentExtensions.asText
 import dev.optimistic.decentdiscordbridge.util.MessageExtensions.hasContent
+import dev.optimistic.decentdiscordbridge.util.StickerExtensions.asText
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeMinecraftSpecial
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
@@ -22,7 +23,7 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: LinkRes
 
     private fun renderContent(
         message: Message,
-        attachmentSeparator: Text,
+        messageComponentSeparator: Text,
         memberOverride: Member? = null,
         contentOverride: String? = null
     ): Text {
@@ -38,18 +39,30 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: LinkRes
                         .withHoverEvent(HoverEvent.Action.SHOW_TEXT.buildHoverEvent(suggestMention))
                         .withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, message.author.asMention))
                 },
-            linkResolver.resolveLinks(content).run {
-                if (message.attachments.isEmpty())
-                    return@run this
+            linkResolver.resolveLinks(content).apply {
+                val hasAttachments = message.attachments.isNotEmpty()
 
-                if (content.isNotEmpty())
-                    this.append(attachmentSeparator)
-                this.append(
-                    Texts.join(
-                        message.attachments.map { it.asText() },
-                        attachmentSeparator
+                if (hasAttachments) {
+                    this.append(messageComponentSeparator)
+
+                    this.append(
+                        Texts.join(
+                            message.attachments.map { it.asText() },
+                            messageComponentSeparator
+                        )
                     )
-                )
+                }
+
+                if (message.stickers.isNotEmpty()) {
+                    if (hasAttachments) this.append(messageComponentSeparator)
+
+                    this.append(
+                        Texts.join(
+                            message.stickers.map { it.asText() },
+                            messageComponentSeparator
+                        )
+                    )
+                }
             }
         )
     }
@@ -66,7 +79,7 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: LinkRes
                     .append(
                         renderContent(
                             message = reply,
-                            attachmentSeparator = ScreenTexts.SPACE,
+                            messageComponentSeparator = ScreenTexts.SPACE,
                             memberOverride = reply.guild.retrieveMember(reply.author)
                                 .onErrorMap { null }.complete()
                         )
@@ -78,7 +91,7 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: LinkRes
         component.append(
             renderContent(
                 message,
-                attachmentSeparator = ScreenTexts.LINE_BREAK,
+                messageComponentSeparator = ScreenTexts.LINE_BREAK,
                 contentOverride = content
             )
         )

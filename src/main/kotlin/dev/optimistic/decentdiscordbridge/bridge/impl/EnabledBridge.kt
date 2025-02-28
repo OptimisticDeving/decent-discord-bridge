@@ -53,7 +53,7 @@ class EnabledBridge(
     private val seenUsersPath: Path
 ) : AbstractBridge() {
     private val logger = LoggerFactory.getLogger("decent-discord-bridge")
-    private val discordRegex: Regex = Regex("([Dd])[Ii]([Ss][Cc][Oo][Rr][Dd])");
+    private val discordRegex: Regex = Regex("([Dd])[Ii]([Ss][Cc][Oo][Rr][Dd])")
 
     private val allowedMentions: AllowedMentions = config.mentions.intoJda()
     private val filter: FilterRenderer = when (config.applyFilterToWebhookMessages) {
@@ -128,6 +128,23 @@ class EnabledBridge(
                 return@listener
 
             val message = it.message
+            val rawContent = message.contentRaw
+
+            if (rawContent.startsWith("/")) {
+                val server = playerManager.server
+                server.submit {
+                    val server = playerManager.server
+                    val sender = DiscordOutput(message, it.author)
+                    server.commandManager.executeWithPrefix(
+                        sender.createCommandSource(server),
+                        rawContent
+                    )
+                    sender.complete()
+                }
+
+                return@listener
+            }
+
             val content = message.contentDisplay
             if (message.isWebhookMessage || !message.hasContent())
                 return@listener

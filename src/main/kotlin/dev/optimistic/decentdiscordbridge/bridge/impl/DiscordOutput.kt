@@ -19,7 +19,7 @@ class DiscordOutput(val message: Message, val user: User) : CommandOutput {
 
     override fun sendMessage(message: Text) {
         if (used) return
-        val asString = message.string
+        val asString = message.string.trim().replace("§[a-f0-9k-or]", "")
         if (asString.isEmpty()) return
         if (!feedback.isEmpty()) this.feedback.append('\n')
         this.feedback.append(asString)
@@ -49,7 +49,7 @@ class DiscordOutput(val message: Message, val user: User) : CommandOutput {
     fun complete() {
         used = true
 
-        val feedback = feedback.toString().trim()
+        val feedback = feedback.toString()
         if (feedback.isEmpty()) return
         if (feedback.length > MAX_LEN) {
             message.replyFiles(FileUpload.fromData(feedback.toByteArray(Charsets.UTF_8), "message.txt"))

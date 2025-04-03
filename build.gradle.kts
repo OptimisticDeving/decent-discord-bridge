@@ -27,15 +27,15 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:0.16.12")
 
     // config
-    jij("org.spongepowered:configurate-core:4.1.2")
-    jij("org.spongepowered:configurate-extra-kotlin:4.1.2")
+    jij("org.spongepowered:configurate-core:4.2.0")
+    jij("org.spongepowered:configurate-extra-kotlin:4.2.0")
     jij("me.lucko.configurate:configurate-toml:4.1")
 
     // discord
-    jij("net.dv8tion:JDA:5.0.0-beta.24") {
+    jij("net.dv8tion:JDA:5.3.1") {
         exclude(module = "opus-java")
     }
-    jij("club.minnced:jda-ktx:0.11.0-beta.20") {
+    jij("club.minnced:jda-ktx:0.12.0") {
         exclude(module = "JDA")
     }
     jij("club.minnced:discord-webhooks:0.8.4")

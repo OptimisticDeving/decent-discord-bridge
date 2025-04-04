@@ -42,8 +42,10 @@ import net.minecraft.network.chat.PlayerChatMessage
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.players.PlayerList
 import org.slf4j.LoggerFactory
+import java.lang.management.ManagementFactory
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.Locale
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -220,7 +222,9 @@ class EnabledBridge(
         if (!broadcastLifecycleEvents)
             return
 
-        sendSystem(Component.literal("Server has started"))
+        val uptime = ManagementFactory.getRuntimeMXBean().uptime.toFloat()
+        val uptimeString = String.format(Locale.ROOT, "%.3fs", uptime / 1000)
+        sendSystem(Component.translatable("Server has started (%s)", uptimeString))
     }
 
     override fun onShutdown() {

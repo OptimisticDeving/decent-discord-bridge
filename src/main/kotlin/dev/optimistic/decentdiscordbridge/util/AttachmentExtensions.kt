@@ -1,17 +1,17 @@
 package dev.optimistic.decentdiscordbridge.util
 
 import net.dv8tion.jda.api.entities.Message
-import net.minecraft.text.ClickEvent
-import net.minecraft.text.HoverEvent
-import net.minecraft.text.Text
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
 
 object AttachmentExtensions {
-    private val hoverEventText = Text.literal("Click to open URL.")
+    private val hoverEventText = Component.literal("Click to open URL.")
 
-    fun Message.Attachment.asText(): Text = Text.literal("[Attachment]")
-        .formatted(Formatting.YELLOW)
-        .styled {
+    fun Message.Attachment.asComponent(): Component = Component.literal("[Attachment]")
+        .withStyle(ChatFormatting.YELLOW)
+        .withStyle {
             it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, this.proxyUrl))
                 .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverEventText))
         }

@@ -1,9 +1,9 @@
 package dev.optimistic.decentdiscordbridge.filter.impl
 
 import dev.optimistic.decentdiscordbridge.filter.FilterRenderer
-import net.minecraft.network.message.SignedMessage
+import net.minecraft.network.chat.PlayerChatMessage
 
 object AppliedFilterRenderer : FilterRenderer {
-    override fun renderFilter(signedMessage: SignedMessage): String? =
-        signedMessage.filterMask.filter(signedMessage.signedBody.content)
+    override fun renderFilter(playerMessage: PlayerChatMessage): String? =
+        playerMessage.filterMask.apply(playerMessage.signedBody.content)
 }

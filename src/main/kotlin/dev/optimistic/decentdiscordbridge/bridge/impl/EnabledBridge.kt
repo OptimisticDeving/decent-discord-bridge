@@ -37,10 +37,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.utils.MemberCachePolicy
-import net.minecraft.network.message.SignedMessage
-import net.minecraft.server.PlayerManager
-import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.PlayerChatMessage
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.players.PlayerList
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,7 +48,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 class EnabledBridge(
-    private val playerManager: PlayerManager,
+    private val playerList: PlayerList,
     config: Configuration,
     private val seenUsersPath: Path
 ) : AbstractBridge() {
@@ -131,12 +131,12 @@ class EnabledBridge(
             val rawContent = message.contentRaw
 
             if (rawContent.startsWith("/")) {
-                val server = playerManager.server
+                val server = playerList.server
                 server.submit {
-                    val server = playerManager.server
+                    val server = playerList.server
                     val sender = DiscordOutput(message, it.author)
-                    server.commandManager.executeWithPrefix(
-                        sender.createCommandSource(server),
+                    server.commands.performPrefixedCommand(
+                        sender.createCommandSourceStack(server),
                         rawContent
                     )
                     sender.complete()
@@ -149,7 +149,7 @@ class EnabledBridge(
             if (message.isWebhookMessage || !message.hasContent())
                 return@listener
 
-            playerManager.broadcast(messageRenderer.render(message, content), false)
+            playerList.broadcastSystemMessage(messageRenderer.render(message, content), false)
         }
 
         jda.awaitReady()
@@ -176,7 +176,7 @@ class EnabledBridge(
         return urlGenerator.generateAvatarUrl(profile)
     }
 
-    private fun sendSystemInternal(message: Text) = webhook.send(
+    private fun sendSystemInternal(message: Component) = webhook.send(
         WebhookMessageBuilder()
             .setUsername("System")
             .setContent(linkResolver.escapeNotLinks(message.string))
@@ -185,13 +185,13 @@ class EnabledBridge(
     )
 
 
-    override fun sendSystem(message: Text) {
+    override fun sendSystem(message: Component) {
         sendSystemInternal(message)
     }
 
     private fun sendPlayerInternal(
-        player: ServerPlayerEntity,
-        message: SignedMessage
+        player: ServerPlayer,
+        message: PlayerChatMessage
     ): CompletableFuture<ReadonlyMessage> {
         val filtered = this.filter.renderFilter(message)?.trim()
         if (filtered === null)
@@ -212,7 +212,7 @@ class EnabledBridge(
         )
     }
 
-    override fun sendPlayer(player: ServerPlayerEntity, message: SignedMessage) {
+    override fun sendPlayer(player: ServerPlayer, message: PlayerChatMessage) {
         sendPlayerInternal(player, message)
     }
 
@@ -220,7 +220,7 @@ class EnabledBridge(
         if (!broadcastLifecycleEvents)
             return
 
-        sendSystem(Text.literal("Server has started"))
+        sendSystem(Component.literal("Server has started"))
     }
 
     override fun onShutdown() {
@@ -228,7 +228,7 @@ class EnabledBridge(
         jda.awaitShutdown(30, TimeUnit.SECONDS)
         if (broadcastLifecycleEvents) {
             try {
-                sendSystemInternal(Text.literal("Server has stopped")).get(15, TimeUnit.SECONDS)
+                sendSystemInternal(Component.literal("Server has stopped")).get(15, TimeUnit.SECONDS)
             } catch (ex: Throwable) {
                 logger.warn("Failed to send shutdown message", ex)
             }

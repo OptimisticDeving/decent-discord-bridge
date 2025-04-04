@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
-    @Inject(method = "shutdown", at = @At("TAIL"))
-    private void shutdown(CallbackInfo ci) {
+    @Inject(method = "stopServer", at = @At("TAIL"))
+    private void stopServer(CallbackInfo ci) {
         if (!DecentDiscordBridge.Companion.isBridgeInitialized()) return;
         final AbstractBridge bridge = DecentDiscordBridge.Companion.getBridge();
         bridge.onShutdown();

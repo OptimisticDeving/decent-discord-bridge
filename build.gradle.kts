@@ -21,9 +21,16 @@ version = "1.4.3"
 
 val jij: Configuration by configurations.creating
 
+repositories {
+    maven("https://maven.parchmentmc.org")
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:1.20.1")
-    mappings("net.fabricmc:yarn:1.20.1+build.10:v2")
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip")
+    })
     modImplementation("net.fabricmc:fabric-loader:0.16.12")
     modImplementation("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20")
 

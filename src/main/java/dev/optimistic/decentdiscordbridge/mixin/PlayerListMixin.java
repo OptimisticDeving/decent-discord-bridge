@@ -4,11 +4,11 @@ import com.mojang.authlib.GameProfile;
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
 import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge;
 import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck;
-import net.minecraft.network.message.MessageType;
-import net.minecraft.network.message.SignedMessage;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,32 +18,32 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Predicate;
 
-@Mixin(PlayerManager.class)
-public abstract class PlayerManagerMixin {
+@Mixin(PlayerList.class)
+public abstract class PlayerListMixin {
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     private void init(CallbackInfo ci) {
-        new DecentDiscordBridge((PlayerManager) (Object) this);
+        new DecentDiscordBridge((PlayerList) (Object) this);
     }
 
-    @Inject(method = "createPlayer", at = @At("HEAD"))
-    private void onCreatePlayer(GameProfile profile, CallbackInfoReturnable<ServerPlayerEntity> cir) {
+    @Inject(method = "getPlayerForLogin", at = @At("HEAD"))
+    private void onPlayerLogin(GameProfile profile, CallbackInfoReturnable<ServerPlayer> cir) {
         ((CachedAvatarUrlDuck) profile).calculateAvatarUrl();
     }
 
-    @Inject(method = "broadcast(Lnet/minecraft/network/message/SignedMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/network/message/MessageType$Parameters;)V", at = @At("TAIL"))
-    private void chatBroadcast(SignedMessage message, Predicate<ServerPlayerEntity> shouldSendFiltered, @Nullable ServerPlayerEntity sender, MessageType.Parameters params, CallbackInfo ci) {
+    @Inject(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At("TAIL"))
+    private void broadcastChatMessage(PlayerChatMessage message, Predicate<ServerPlayer> shouldSendFiltered, @Nullable ServerPlayer sender, ChatType.Bound params, CallbackInfo ci) {
         final AbstractBridge bridge = DecentDiscordBridge.Companion.getBridge();
 
         if (sender == null) {
-            bridge.sendSystem(params.applyChatDecoration(message.getContent()));
+            bridge.sendSystem(params.decorate(message.decoratedContent()));
         } else {
             bridge.sendPlayer(sender, message);
         }
     }
 
-    @Inject(method = "broadcast(Lnet/minecraft/text/Text;Z)V", at = @At("TAIL"))
-    private void serverBroadcast(Text message, boolean overlay, CallbackInfo ci) {
-        if (overlay)
+    @Inject(method = "broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", at = @At("TAIL"))
+    private void broadcastSystemMessage(Component message, boolean bypassHiddenChat, CallbackInfo ci) {
+        if (bypassHiddenChat)
             return; // again, who cares?
 
         if (DecentDiscordBridge.Companion

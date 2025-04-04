@@ -2,43 +2,43 @@ package dev.optimistic.decentdiscordbridge.message.impl
 
 import dev.optimistic.decentdiscordbridge.link.AbstractLinkResolver
 import dev.optimistic.decentdiscordbridge.message.DiscordMessageToMinecraftRenderer
-import dev.optimistic.decentdiscordbridge.util.AttachmentExtensions.asText
+import dev.optimistic.decentdiscordbridge.util.AttachmentExtensions.asComponent
 import dev.optimistic.decentdiscordbridge.util.MessageExtensions.hasContent
-import dev.optimistic.decentdiscordbridge.util.StickerExtensions.asText
+import dev.optimistic.decentdiscordbridge.util.StickerExtensions.asComponent
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeMinecraftSpecial
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.Role
-import net.minecraft.screen.ScreenTexts
-import net.minecraft.text.ClickEvent
-import net.minecraft.text.HoverEvent
-import net.minecraft.text.Text
-import net.minecraft.text.Texts
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.CommonComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.ComponentUtils
+import net.minecraft.network.chat.HoverEvent
 
 class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: AbstractLinkResolver) :
     DiscordMessageToMinecraftRenderer {
-    private val renderedMessages = arrayListOf<Text>()
-    private val suggestMention = Text.literal("Click to copy a mention for this user to your clipboard.")
+    private val renderedMessages = arrayListOf<Component>()
+    private val suggestMention = Component.literal("Click to copy a mention for this user to your clipboard.")
 
     private fun renderContent(
         message: Message,
-        messageComponentSeparator: Text,
+        messageComponentSeparator: Component,
         memberOverride: Member? = null,
         contentOverride: String? = null
-    ): Text {
+    ): Component {
         val content = (contentOverride ?: message.contentDisplay).escapeMinecraftSpecial();
         val member = memberOverride ?: message.member
 
-        return Text.translatable(
+        return Component.translatable(
             "chat.type.text",
-            Text.literal(
+            Component.literal(
                 (member?.effectiveName ?: message.author.effectiveName).escapeMinecraftSpecial()
             )
-                .formatted(Formatting.ITALIC)
-                .styled {
+                .withStyle(ChatFormatting.ITALIC)
+                .withStyle {
                     it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW)
-                        .withHoverEvent(HoverEvent.Action.SHOW_TEXT.buildHoverEvent(suggestMention))
+                        .withHoverEvent(HoverEvent.Action.SHOW_TEXT.deserializeFromLegacy(suggestMention))
                         .withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, message.author.asMention))
                 },
             linkResolver.resolveLinks(content).apply {
@@ -48,8 +48,8 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
                     this.append(messageComponentSeparator)
 
                     this.append(
-                        Texts.join(
-                            message.attachments.map { it.asText() },
+                        ComponentUtils.formatList(
+                            message.attachments.map { it.asComponent() },
                             messageComponentSeparator
                         )
                     )
@@ -59,8 +59,8 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
                     if (hasAttachments) this.append(messageComponentSeparator)
 
                     this.append(
-                        Texts.join(
-                            message.stickers.map { it.asText() },
+                        ComponentUtils.formatList(
+                            message.stickers.map { it.asComponent() },
                             messageComponentSeparator
                         )
                     )
@@ -70,30 +70,30 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
     }
 
 
-    override fun render(message: Message, content: String): Text {
+    override fun render(message: Message, content: String): Component {
         val reply = message.referencedMessage
-        val component = Text.empty()
+        val component = Component.empty()
 
         if (reply !== null && reply.hasContent()) {
             component.append(
-                Text.empty()
+                Component.empty()
                     .append("⊢ ")
                     .append(
                         renderContent(
                             message = reply,
-                            messageComponentSeparator = ScreenTexts.SPACE,
+                            messageComponentSeparator = CommonComponents.SPACE,
                             memberOverride = reply.guild.retrieveMember(reply.author)
                                 .onErrorMap { null }.complete()
                         )
                     )
-                    .append(ScreenTexts.LINE_BREAK)
+                    .append(CommonComponents.NEW_LINE)
             )
         }
 
         component.append(
             renderContent(
                 message,
-                messageComponentSeparator = ScreenTexts.LINE_BREAK,
+                messageComponentSeparator = CommonComponents.NEW_LINE,
                 contentOverride = content
             )
         )
@@ -105,6 +105,6 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
         return component
     }
 
-    override fun isRenderedAndRemoveIfSo(component: Text) =
+    override fun isRenderedAndRemoveIfSo(component: Component) =
         synchronized(renderedMessages) { renderedMessages.remove(component) }
 }

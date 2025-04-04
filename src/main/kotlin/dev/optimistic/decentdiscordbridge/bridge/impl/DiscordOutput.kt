@@ -3,21 +3,21 @@ package dev.optimistic.decentdiscordbridge.bridge.impl
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.utils.FileUpload
+import net.minecraft.commands.CommandSource
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
-import net.minecraft.server.command.CommandOutput
-import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.server.world.ServerWorld
-import net.minecraft.text.Text
-import net.minecraft.util.math.Vec2f
-import net.minecraft.util.math.Vec3d
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.phys.Vec2
+import net.minecraft.world.phys.Vec3
 
 const val MAX_LEN = 2000 - (3 * 6)
 
-class DiscordOutput(val message: Message, val user: User) : CommandOutput {
+class DiscordOutput(val message: Message, val user: User) : CommandSource {
     private val feedback = StringBuilder()
     var used = false
 
-    override fun sendMessage(message: Text) {
+    override fun sendSystemMessage(message: Component) {
         if (used) return
         val asString = message.string.trim().replace("§[a-f0-9k-or]", "")
         if (asString.isEmpty()) return
@@ -25,22 +25,22 @@ class DiscordOutput(val message: Message, val user: User) : CommandOutput {
         this.feedback.append(asString)
     }
 
-    override fun shouldReceiveFeedback() = true
-    override fun shouldTrackOutput() = true
-    override fun shouldBroadcastConsoleToOps() = true
-    override fun cannotBeSilenced() = true
+    override fun acceptsSuccess() = true
+    override fun acceptsFailure() = true
+    override fun shouldInformAdmins() = true
+    override fun alwaysAccepts() = true
 
-    fun createCommandSource(server: MinecraftServer): ServerCommandSource {
-        val world: ServerWorld = server.overworld
+    fun createCommandSourceStack(server: MinecraftServer): CommandSourceStack {
+        val level: ServerLevel = server.overworld()
 
-        return ServerCommandSource(
+        return CommandSourceStack(
             this,
-            Vec3d.of(world.getSpawnPos()),
-            Vec2f.ZERO,
-            world,
+            Vec3.atLowerCornerOf(level.sharedSpawnPos),
+            Vec2.ZERO,
+            level,
             0,
             user.effectiveName,
-            Text.literal(user.effectiveName),
+            Component.literal(user.effectiveName),
             server,
             null
         )

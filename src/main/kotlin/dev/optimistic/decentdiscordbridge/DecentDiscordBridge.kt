@@ -5,13 +5,13 @@ import dev.optimistic.decentdiscordbridge.bridge.impl.DisabledBridge
 import dev.optimistic.decentdiscordbridge.bridge.impl.EnabledBridge
 import me.lucko.configurate.toml.TOMLConfigurationLoader
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.server.PlayerManager
+import net.minecraft.server.players.PlayerList
 import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.kotlin.objectMapperFactory
 import java.nio.file.Files
 
-class DecentDiscordBridge(playerManager: PlayerManager) {
+class DecentDiscordBridge(playerList: PlayerList) {
     init {
         val loader = FabricLoader.getInstance()
         val configSubpath = loader.configDir.resolve("decent-discord-bridge")
@@ -40,7 +40,7 @@ class DecentDiscordBridge(playerManager: PlayerManager) {
         logger.info("Config loaded.")
         if (config.shouldLoad()) {
             val seenUsersPath = configSubpath.resolve("seen_users.json")
-            bridge = EnabledBridge(playerManager, config, seenUsersPath)
+            bridge = EnabledBridge(playerList, config, seenUsersPath)
             logger.info("Bridge successfully loaded!")
         } else {
             logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

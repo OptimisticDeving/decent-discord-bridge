@@ -1,7 +1,7 @@
 package dev.optimistic.decentdiscordbridge.filter
 
-import net.minecraft.network.message.SignedMessage
+import net.minecraft.network.chat.PlayerChatMessage
 
 interface FilterRenderer {
-    fun renderFilter(signedMessage: SignedMessage): String?
+    fun renderFilter(playerMessage: PlayerChatMessage): String?
 }

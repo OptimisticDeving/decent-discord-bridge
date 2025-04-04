@@ -46,6 +46,7 @@ dependencies {
     // discord
     jij("net.dv8tion:JDA:5.3.1") {
         exclude(module = "gson")
+        exclude(module = "error_prone_annotations")
         exclude(module = "opus-java")
         exclude(module = "slf4j-api")
         exclude(group = "org.jetbrains.kotlin")

@@ -8,7 +8,7 @@ import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.1.20"
     id("fabric-loom") version "1.10-SNAPSHOT"
 }
 
@@ -25,20 +25,31 @@ dependencies {
     minecraft("com.mojang:minecraft:1.20.1")
     mappings("net.fabricmc:yarn:1.20.1+build.10:v2")
     modImplementation("net.fabricmc:fabric-loader:0.16.12")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20")
 
     // config
     jij("org.spongepowered:configurate-core:4.2.0")
-    jij("org.spongepowered:configurate-extra-kotlin:4.2.0")
-    jij("me.lucko.configurate:configurate-toml:4.1")
+    jij("org.spongepowered:configurate-extra-kotlin:4.2.0") {
+        isTransitive = false
+    }
+    jij("me.lucko.configurate:configurate-toml:4.1") {
+        exclude(module = "gson")
+    }
 
     // discord
     jij("net.dv8tion:JDA:5.3.1") {
+        exclude(module = "gson")
         exclude(module = "opus-java")
+        exclude(module = "slf4j-api")
+        exclude(group = "org.jetbrains.kotlin")
     }
     jij("club.minnced:jda-ktx:0.12.0") {
-        exclude(module = "JDA")
+        isTransitive = false
     }
-    jij("club.minnced:discord-webhooks:0.8.4")
+    jij("club.minnced:discord-webhooks:0.8.4") {
+        exclude(module = "slf4j-api")
+        exclude(group = "org.jetbrains.kotlin")
+    }
 }
 
 configurations {

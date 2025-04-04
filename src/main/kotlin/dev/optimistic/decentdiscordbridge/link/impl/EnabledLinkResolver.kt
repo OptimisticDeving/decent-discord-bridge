@@ -1,26 +1,26 @@
 package dev.optimistic.decentdiscordbridge.link.impl
 
 import dev.optimistic.decentdiscordbridge.link.AbstractLinkResolver
-import dev.optimistic.decentdiscordbridge.text.DelimiterBasedStringTextConversion
-import dev.optimistic.decentdiscordbridge.text.StringToTextConversion
+import dev.optimistic.decentdiscordbridge.component.DelimiterBasedStringComponentConversion
+import dev.optimistic.decentdiscordbridge.component.StringToComponentConversion
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeDiscordSpecial
-import net.minecraft.text.ClickEvent
-import net.minecraft.text.MutableText
-import net.minecraft.text.Text
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 
-object EnabledLinkResolver : AbstractLinkResolver(), StringToTextConversion {
+object EnabledLinkResolver : AbstractLinkResolver(), StringToComponentConversion {
     private val linkRegex =
         Regex(
             "https?://[\\w-]{2,}(?:\\.[\\w-]+)*\\.?(?::\\d+)?(?:/.*)?",
             RegexOption.IGNORE_CASE,
         )
 
-    override fun convert(input: String, escapedLiteralFactory: (String) -> MutableText): MutableText {
+    override fun convert(input: String, escapedLiteralFactory: (String) -> MutableComponent): MutableComponent {
         val matches = linkRegex.findAll(input)
         if (matches.none())
             return escapedLiteralFactory(input)
-        val component = Text.empty()
+        val component = Component.empty()
 
         for ((idx, match) in matches.withIndex()) {
             if (idx == 0) {
@@ -29,16 +29,16 @@ object EnabledLinkResolver : AbstractLinkResolver(), StringToTextConversion {
             }
 
             component.append(
-                Text.literal(match.value)
-                    .formatted(Formatting.BLUE)
-                    .styled { it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, match.value)) }
+                Component.literal(match.value)
+                    .withStyle(ChatFormatting.BLUE)
+                    .withStyle { it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, match.value)) }
             )
         }
 
         return component
     }
 
-    override val delimitedConversion: DelimiterBasedStringTextConversion = createDelimConversion(this)
+    override val delimitedConversion: DelimiterBasedStringComponentConversion = createDelimConversion(this)
 
     override fun escapeNotLinks(input: String): String {
         val matches = linkRegex.findAll(input)

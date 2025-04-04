@@ -7,9 +7,9 @@
   },
   "mixins": [
     "GameProfileMixin",
-    "MinecraftDedicatedServerMixin",
+    "DedicatedServerMixin",
     "MinecraftServerMixin",
-    "PlayerManagerMixin",
-    "ServerPlayerEntityMixin"
+    "PlayerListMixin",
+    "ServerPlayerMixin"
   ]
 }

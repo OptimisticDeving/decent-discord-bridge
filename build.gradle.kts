@@ -45,11 +45,12 @@ dependencies {
 
     // discord
     jij("net.dv8tion:JDA:5.3.1") {
-        exclude(module = "gson")
-        exclude(module = "error_prone_annotations")
-        exclude(module = "opus-java")
         exclude(module = "slf4j-api")
         exclude(group = "org.jetbrains.kotlin")
+
+        // Audio
+        exclude(module = "opus-java")
+        exclude(module = "tink")
     }
     jij("club.minnced:jda-ktx:0.12.0") {
         isTransitive = false

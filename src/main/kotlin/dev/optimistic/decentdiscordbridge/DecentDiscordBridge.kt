@@ -4,8 +4,9 @@ import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge
 import dev.optimistic.decentdiscordbridge.bridge.impl.DisabledBridge
 import dev.optimistic.decentdiscordbridge.bridge.impl.EnabledBridge
 import me.lucko.configurate.toml.TOMLConfigurationLoader
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.server.players.PlayerList
+import net.minecraftforge.fml.loading.FMLConfig
+import net.minecraftforge.fml.loading.FMLPaths
 import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.kotlin.objectMapperFactory
@@ -13,8 +14,8 @@ import java.nio.file.Files
 
 class DecentDiscordBridge(playerList: PlayerList) {
     init {
-        val loader = FabricLoader.getInstance()
-        val configSubpath = loader.configDir.resolve("decent-discord-bridge")
+        val rootConfigPath = FMLPaths.GAMEDIR.get().resolve("config")
+        val configSubpath = rootConfigPath.resolve("decent-discord-bridge")
         val configPath = configSubpath.resolve("config.toml")
         if (Files.notExists(configPath)) {
             Files.createDirectories(configPath.parent)

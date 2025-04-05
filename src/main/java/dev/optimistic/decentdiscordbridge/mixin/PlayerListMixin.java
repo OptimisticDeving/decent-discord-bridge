@@ -25,9 +25,9 @@ public abstract class PlayerListMixin {
         new DecentDiscordBridge((PlayerList) (Object) this);
     }
 
-    @Inject(method = "getPlayerForLogin", at = @At("HEAD"))
+    @Inject(method = "getPlayerForLogin", at = @At("TAIL"))
     private void onPlayerLogin(GameProfile profile, CallbackInfoReturnable<ServerPlayer> cir) {
-        ((CachedAvatarUrlDuck) profile).calculateAvatarUrl();
+        ((CachedAvatarUrlDuck) cir.getReturnValue()).calculateAvatarUrl();
     }
 
     @Inject(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At("TAIL"))

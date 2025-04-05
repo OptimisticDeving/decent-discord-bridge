@@ -1,0 +1,35 @@
+modLoader = "lowcodefml"
+loaderVersion = "[47,)"
+license = "MIT"
+
+[[mods]]
+modId = "decent_discord_bridge"
+version = "${version}"
+displayName = "Decent Discord Bridge"
+description = '''
+An attempt at writing a decent Discord bridge for the Fabric ecosystem.
+'''
+authors = "OptimisticDev"
+displayURL = "https://github.com/OptimisticDeving/decent-discord-bridge/"
+displayTest="IGNORE_SERVER_VERSION" # Server only mod
+
+[[dependencies.decent_discord_bridge]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.decent_discord_bridge]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20,1.21)"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.decent_discord_bridge]]
+modId = "kotlinforforge"
+mandatory = true
+versionRange = "[4.11,)"
+ordering = "NONE"
+side = "SERVER"

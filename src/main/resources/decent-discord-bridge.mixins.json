@@ -1,4 +1,6 @@
 {
+  "minVersion": "0.8",
+  "refmap": "decent-discord-bridge.refmap.json",
   "required": true,
   "package": "dev.optimistic.decentdiscordbridge.mixin",
   "compatibilityLevel": "JAVA_17",
@@ -7,7 +9,6 @@
   },
   "mixins": [
     "DedicatedServerMixin",
-    "GameProfileMixin",
     "MinecraftServerMixin",
     "PlayerListMixin",
     "ServerPlayerMixin"

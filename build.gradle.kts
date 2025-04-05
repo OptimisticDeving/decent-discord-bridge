@@ -1,19 +1,15 @@
-import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import java.io.BufferedOutputStream
-import java.nio.file.Files
-import java.util.jar.JarInputStream
-import java.util.jar.JarOutputStream
-import java.util.zip.ZipEntry
 
 plugins {
     kotlin("jvm") version "2.1.20"
-    id("fabric-loom") version "1.10-SNAPSHOT"
+    id("net.minecraftforge.gradle") version "6.0.35"
+    id("org.spongepowered.mixin") version "0.7.+"
 }
 
-loom {
-    serverOnlyMinecraftJar()
+jarJar.disable() // We have our own system
+minecraft {
+    mappings("official", "1.20.1")
 }
 
 group = "dev.optimistic"
@@ -22,17 +18,15 @@ version = "1.4.3"
 val jij: Configuration by configurations.creating
 
 repositories {
-    maven("https://maven.parchmentmc.org")
+    maven("https://thedarkcolour.github.io/KotlinForForge/") {
+        content { includeGroup("thedarkcolour") }
+    }
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.20.1")
-    mappings(loom.layered {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip")
-    })
-    modImplementation("net.fabricmc:fabric-loader:0.16.12")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20")
+    minecraft("net.minecraftforge:forge:1.20.1-47.4.0")
+    implementation("thedarkcolour:kotlinforforge:4.11.0")
+    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
     // config
     jij("org.spongepowered:configurate-core:4.2.0")
@@ -59,6 +53,11 @@ dependencies {
         exclude(module = "slf4j-api")
         exclude(group = "org.jetbrains.kotlin")
     }
+}
+
+mixin {
+    add(sourceSets.main.get(), "decent-discord-bridge.refmap.json")
+    config("decent-discord-bridge.mixins.json")
 }
 
 configurations {
@@ -96,54 +95,34 @@ tasks {
         dependsOn(jij)
 
         jij.forEach { file ->
-            val inputStream = JarInputStream(file.inputStream())
-            val path = Files.createTempFile("giggle", "gaggle")
-            val fileOutputStream = BufferedOutputStream(Files.newOutputStream(path))
-            val jarOutputStream = JarOutputStream(fileOutputStream)
-            var entry = inputStream.nextJarEntry
-
-            while (entry != null) {
-                jarOutputStream.putNextEntry(entry as ZipEntry)
-                val entryBytes = inputStream.readAllBytes()
-                jarOutputStream.write(entryBytes, 0, entryBytes.size)
-                jarOutputStream.closeEntry()
-                inputStream.closeEntry()
-                entry = inputStream.nextJarEntry
-            }
-
-            jarOutputStream.putNextEntry(ZipEntry("fabric.mod.json"))
-
-            val fabricModJson = JsonObject()
-            fabricModJson.addProperty("schemaVersion", 1)
-            fabricModJson.addProperty("id", file.nameWithoutExtension.lowercase().replace(Regex("[^a-z0-9_-]"), "_"))
-            fabricModJson.addProperty("version", "0.0.0")
-            fabricModJson.addProperty("name", file.nameWithoutExtension)
-
-            val jsonBytes = Gson().toJson(fabricModJson).encodeToByteArray()
-            jarOutputStream.write(jsonBytes, 0, jsonBytes.size)
-            jarOutputStream.closeEntry()
-            jarOutputStream.flush()
-            jarOutputStream.close()
-            fileOutputStream.flush()
-            fileOutputStream.close()
-
-            from(path) {
-                rename { "META-INF/jars/${file.name}" }
+            from(file.path) {
+                rename { "META-INF/jarjar/${file.name}" }
             }
         }
 
-        filesMatching("fabric.mod.json") {
+        filesMatching("META-INF/mods.toml") {
+            expand("version" to project.version)
+        }
+
+        filesMatching("META-INF/jarjar/metadata.json") {
             val jarsJson = JsonArray()
             jij.forEach {
+                val identifier = JsonObject()
+                identifier.addProperty("group", "dev.optimistic.decentdiscordbridge")
+                identifier.addProperty("artifact", it.nameWithoutExtension)
+
+                val version = JsonObject()
+                version.addProperty("range", "0.0.0")
+                version.addProperty("artifactVersion", "0.0.0")
+
                 val jsonObject = JsonObject()
-                jsonObject.addProperty("file", "META-INF/jars/${it.name}")
+                jsonObject.addProperty("path", "META-INF/jarjar/${it.name}")
+                jsonObject.add("identifier", identifier)
+                jsonObject.add("version", version)
                 jarsJson.add(jsonObject)
             }
 
-            expand(
-                "version" to project.version,
-                "jars" to jarsJson.toString()
-            )
+            expand("jars" to jarsJson.toString())
         }
     }
 }

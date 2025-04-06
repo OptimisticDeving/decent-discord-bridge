@@ -27,8 +27,7 @@ public abstract class PlayerListMixin {
     }
 
     @Inject(method = "getPlayerForLogin", at = @At("HEAD"))
-    private void onPlayerLogin(GameProfile profile, ClientInformation clientInformation,
-                               CallbackInfoReturnable<ServerPlayer> cir) {
+    private void onPlayerLogin(GameProfile profile, ClientInformation clientInformation, CallbackInfoReturnable<ServerPlayer> cir) {
         ((CachedAvatarUrlDuck) profile).calculateAvatarUrl();
     }
 

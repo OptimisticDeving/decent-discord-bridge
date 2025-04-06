@@ -7,6 +7,7 @@ import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +27,8 @@ public abstract class PlayerListMixin {
     }
 
     @Inject(method = "getPlayerForLogin", at = @At("HEAD"))
-    private void onPlayerLogin(GameProfile profile, CallbackInfoReturnable<ServerPlayer> cir) {
+    private void onPlayerLogin(GameProfile profile, ClientInformation clientInformation,
+                               CallbackInfoReturnable<ServerPlayer> cir) {
         ((CachedAvatarUrlDuck) profile).calculateAvatarUrl();
     }
 

@@ -26,10 +26,10 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.20.1")
+    minecraft("com.mojang:minecraft:1.21.1")
     mappings(loom.layered {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip")
+        parchment("org.parchmentmc.data:parchment-1.21.1:2024.11.17@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:0.16.12")
     modImplementation("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20")
@@ -79,7 +79,7 @@ java {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 tasks {
@@ -88,7 +88,7 @@ tasks {
     }
 
     withType<JavaCompile>().configureEach {
-        options.release = 17
+        options.release = 21
         options.encoding = "UTF-8"
     }
 

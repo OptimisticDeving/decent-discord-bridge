@@ -38,7 +38,7 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
                 .withStyle(ChatFormatting.ITALIC)
                 .withStyle {
                     it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW)
-                        .withHoverEvent(HoverEvent.Action.SHOW_TEXT.deserializeFromLegacy(suggestMention))
+                        .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, suggestMention))
                         .withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, message.author.asMention))
                 },
             linkResolver.resolveLinks(content).apply {

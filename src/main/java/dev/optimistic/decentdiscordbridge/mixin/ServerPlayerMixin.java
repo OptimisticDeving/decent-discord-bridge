@@ -10,7 +10,7 @@ public abstract class ServerPlayerMixin implements CachedAvatarUrlDuck {
     public String getAvatarUrl() {
         return ((CachedAvatarUrlDuck)
                 (((ServerPlayer) (Object) this)
-                        .getGameProfile()))
+                        .connection))
                 .getAvatarUrl();
     }
 }

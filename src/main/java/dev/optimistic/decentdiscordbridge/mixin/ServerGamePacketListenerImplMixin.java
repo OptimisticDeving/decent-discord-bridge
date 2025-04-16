@@ -3,12 +3,16 @@ package dev.optimistic.decentdiscordbridge.mixin;
 import com.mojang.authlib.GameProfile;
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
 import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(GameProfile.class)
-public abstract class GameProfileMixin implements CachedAvatarUrlDuck {
+@Mixin(ServerGamePacketListenerImpl.class)
+public abstract class ServerGamePacketListenerImplMixin implements CachedAvatarUrlDuck {
+    @Shadow protected abstract GameProfile playerProfile();
+
     @Unique
     private @Nullable String avatarUrl;
 
@@ -18,7 +22,7 @@ public abstract class GameProfileMixin implements CachedAvatarUrlDuck {
             return;
 
         this.avatarUrl = DecentDiscordBridge.Companion.getBridge()
-                .generateAvatarUrl((GameProfile) (Object) this);
+                .generateAvatarUrl(this.playerProfile());
     }
 
     @Override

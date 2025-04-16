@@ -7,7 +7,7 @@
   },
   "mixins": [
     "DedicatedServerMixin",
-    "GameProfileMixin",
+    "ServerGamePacketListenerImplMixin",
     "MinecraftServerMixin",
     "PlayerListMixin",
     "ServerPlayerMixin"

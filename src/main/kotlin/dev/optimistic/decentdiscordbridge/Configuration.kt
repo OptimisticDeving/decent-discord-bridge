@@ -25,7 +25,7 @@ data class Configuration(
     @ConfigSerializable
     data class AvatarConfiguration(
         val templateType: TemplateType = TemplateType.UNDASHED_UUID,
-        val template: String = "https://minotar.net/avatar/%s"
+        val template: String = "https://minotar.net/helm/%s"
     ) {
         enum class TemplateType {
             UNDASHED_UUID,

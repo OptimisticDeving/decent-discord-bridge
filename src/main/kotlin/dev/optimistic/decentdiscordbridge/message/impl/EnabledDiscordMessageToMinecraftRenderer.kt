@@ -38,8 +38,8 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
                 .withStyle(ChatFormatting.ITALIC)
                 .withStyle {
                     it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW)
-                        .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, suggestMention))
-                        .withClickEvent(ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, message.author.asMention))
+                        .withHoverEvent(HoverEvent.ShowText(suggestMention))
+                        .withClickEvent(ClickEvent.CopyToClipboard(message.author.asMention))
                 },
             linkResolver.resolveLinks(content).apply {
                 val hasAttachments = message.attachments.isNotEmpty()

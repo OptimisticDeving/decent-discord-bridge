@@ -8,6 +8,8 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
+import java.net.URI
+import java.net.URISyntaxException
 
 object EnabledLinkResolver : AbstractLinkResolver(), StringToComponentConversion {
     private val linkRegex =
@@ -28,10 +30,18 @@ object EnabledLinkResolver : AbstractLinkResolver(), StringToComponentConversion
                 if (before > 0) component.append(escapedLiteralFactory(input.substring(0, before)))
             }
 
+            val uri: URI
+            try {
+                uri = URI(match.value)
+            } catch (_: URISyntaxException) {
+                component.append(escapedLiteralFactory(match.value))
+                continue
+            }
+
             component.append(
                 Component.literal(match.value)
                     .withStyle(ChatFormatting.BLUE)
-                    .withStyle { it.withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, match.value)) }
+                    .withStyle { it.withClickEvent(ClickEvent.OpenUrl(uri)) }
             )
         }
 

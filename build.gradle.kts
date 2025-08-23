@@ -26,13 +26,13 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.21.1")
+    minecraft("com.mojang:minecraft:1.21.8")
     mappings(loom.layered {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-1.21.1:2024.11.17@zip")
+        parchment("org.parchmentmc.data:parchment-1.21.8:2025.07.20@zip")
     })
-    modImplementation("net.fabricmc:fabric-loader:0.16.12")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.2+kotlin.2.1.20")
+    modImplementation("net.fabricmc:fabric-loader:0.17.2")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.5+kotlin.2.2.10")
 
     // config
     jij("org.spongepowered:configurate-core:4.2.0")

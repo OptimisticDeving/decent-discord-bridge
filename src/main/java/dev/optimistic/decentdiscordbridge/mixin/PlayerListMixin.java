@@ -4,18 +4,18 @@ import com.mojang.authlib.GameProfile;
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
 import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge;
 import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Predicate;
 
@@ -26,8 +26,9 @@ public abstract class PlayerListMixin {
         new DecentDiscordBridge((PlayerList) (Object) this);
     }
 
-    @Inject(method = "getPlayerForLogin", at = @At("HEAD"))
-    private void onPlayerLogin(GameProfile profile, ClientInformation clientInformation, CallbackInfoReturnable<ServerPlayer> cir) {
+    @Inject(method = "placeNewPlayer", at = @At("HEAD"))
+    private void onPlayerLogin(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
+        final GameProfile profile = player.getGameProfile();
         ((CachedAvatarUrlDuck) profile).calculateAvatarUrl();
     }
 

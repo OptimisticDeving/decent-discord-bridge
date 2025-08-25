@@ -9,7 +9,7 @@ import java.util.zip.ZipEntry
 
 plugins {
     kotlin("jvm") version "2.1.20"
-    id("fabric-loom") version "1.10-SNAPSHOT"
+    id("fabric-loom") version "1.11-SNAPSHOT"
 }
 
 loom {

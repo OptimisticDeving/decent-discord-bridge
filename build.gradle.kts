@@ -17,7 +17,7 @@ loom {
 }
 
 group = "dev.optimistic"
-version = "1.5.1"
+version = "1.5.2"
 
 val jij: Configuration by configurations.creating
 

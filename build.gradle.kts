@@ -8,7 +8,7 @@ import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.2.10"
     id("fabric-loom") version "1.11-SNAPSHOT"
 }
 

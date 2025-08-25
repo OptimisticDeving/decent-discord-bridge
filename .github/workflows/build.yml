@@ -15,7 +15,6 @@ jobs:
             ~/.m2
             ./.gradle
             ./build
-            /opt/hostedtoolcache/
           key: the-cache
       - name: validate gradle wrapper
         uses: gradle/actions/wrapper-validation@v4

@@ -1,0 +1,26 @@
+modLoader = "lowcodefml"
+loaderVersion = "1"
+license = "MIT"
+issueTrackerURL = "https://github.com/OptimisticDeving/decent-discord-bridge/issues"
+
+[[mods]]
+modId = "decent_discord_bridge"
+version = "${version}"
+displayName = "Decent Discord Bridge"
+description = "An attempt at writing a decent Discord bridge for the Fabric ecosystem."
+authors = "OptimisticDev"
+modUrl = "https://github.com/OptimisticDeving/decent-discord-bridge/"
+displayURL = "https://github.com/OptimisticDeving/decent-discord-bridge/"
+
+features = { java_version = "[21,)" }
+
+[[mixins]]
+config = "decent-discord-bridge.mixins.json"
+
+[[dependencies.decent_discord_bridge]]
+modId = "minecraft"
+versionRange = "1.21.1"
+
+[[dependencies.decent_discord_bridge]]
+modId = "kotlinforforge"
+versionRange = "[5.10.0,)"

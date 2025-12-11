@@ -1,11 +1,6 @@
-import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import java.io.BufferedOutputStream
-import java.nio.file.Files
-import java.util.jar.JarInputStream
-import java.util.jar.JarOutputStream
-import java.util.zip.ZipEntry
+import net.fabricmc.loom.task.AbstractRemapJarTask
 
 plugins {
     kotlin("jvm") version "2.2.21"
@@ -23,16 +18,21 @@ val jij: Configuration by configurations.creating
 
 repositories {
     maven("https://maven.parchmentmc.org")
+    maven("https://maven.neoforged.net/releases")
+    maven("https://thedarkcolour.github.io/KotlinForForge")
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.21.11")
+    minecraft("com.mojang:minecraft:1.21.1")
     mappings(loom.layered {
         officialMojangMappings()
         //parchment("org.parchmentmc.data:parchment-1.21.8:2025.07.20@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:0.18.2")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
+    implementation("net.neoforged.fancymodloader:loader:4.0.42") {
+        isTransitive = false
+    }
+    implementation("thedarkcolour:kotlinforforge:5.10.0")
 
     // config
     jij("org.spongepowered:configurate-core:4.2.0")
@@ -92,58 +92,42 @@ tasks {
         options.encoding = "UTF-8"
     }
 
+    withType<AbstractRemapJarTask>().configureEach {
+        targetNamespace = "named"
+    }
+
     processResources {
         dependsOn(jij)
 
         jij.forEach { file ->
-            val inputStream = JarInputStream(file.inputStream())
-            val path = Files.createTempFile("giggle", "gaggle")
-            val fileOutputStream = BufferedOutputStream(Files.newOutputStream(path))
-            val jarOutputStream = JarOutputStream(fileOutputStream)
-            var entry = inputStream.nextJarEntry
-
-            while (entry != null) {
-                jarOutputStream.putNextEntry(entry as ZipEntry)
-                val entryBytes = inputStream.readAllBytes()
-                jarOutputStream.write(entryBytes, 0, entryBytes.size)
-                jarOutputStream.closeEntry()
-                inputStream.closeEntry()
-                entry = inputStream.nextJarEntry
-            }
-
-            jarOutputStream.putNextEntry(ZipEntry("fabric.mod.json"))
-
-            val fabricModJson = JsonObject()
-            fabricModJson.addProperty("schemaVersion", 1)
-            fabricModJson.addProperty("id", file.nameWithoutExtension.lowercase().replace(Regex("[^a-z0-9_-]"), "_"))
-            fabricModJson.addProperty("version", "0.0.0")
-            fabricModJson.addProperty("name", file.nameWithoutExtension)
-
-            val jsonBytes = Gson().toJson(fabricModJson).encodeToByteArray()
-            jarOutputStream.write(jsonBytes, 0, jsonBytes.size)
-            jarOutputStream.closeEntry()
-            jarOutputStream.flush()
-            jarOutputStream.close()
-            fileOutputStream.flush()
-            fileOutputStream.close()
-
-            from(path) {
-                rename { "META-INF/jars/${file.name}" }
+            from(file.path) {
+                rename { "META-INF/jarjar/${file.name}" }
             }
         }
 
-        filesMatching("fabric.mod.json") {
+        filesMatching("META-INF/neoforge.mods.toml") {
+            expand("version" to project.version)
+        }
+
+        filesMatching("META-INF/jarjar/metadata.json") {
             val jarsJson = JsonArray()
             jij.forEach {
+                val identifier = JsonObject()
+                identifier.addProperty("group", "dev.optimistic.decentdiscordbridge")
+                identifier.addProperty("artifact", it.nameWithoutExtension)
+
+                val version = JsonObject()
+                version.addProperty("range", "0.0.0")
+                version.addProperty("artifactVersion", "0.0.0")
+
                 val jsonObject = JsonObject()
-                jsonObject.addProperty("file", "META-INF/jars/${it.name}")
+                jsonObject.addProperty("path", "META-INF/jarjar/${it.name}")
+                jsonObject.add("identifier", identifier)
+                jsonObject.add("version", version)
                 jarsJson.add(jsonObject)
             }
 
-            expand(
-                "version" to project.version,
-                "jars" to jarsJson.toString()
-            )
+            expand("jars" to jarsJson.toString())
         }
     }
 }

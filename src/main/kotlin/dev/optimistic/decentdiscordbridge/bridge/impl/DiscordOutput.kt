@@ -8,7 +8,6 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.permissions.LevelBasedPermissionSet
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.phys.Vec3
 
@@ -36,10 +35,10 @@ class DiscordOutput(val message: Message, val user: User) : CommandSource {
 
         return CommandSourceStack(
             this,
-            Vec3.atLowerCornerOf(level.respawnData.pos()),
+            Vec3.atLowerCornerOf(level.sharedSpawnPos),
             Vec2.ZERO,
             level,
-            LevelBasedPermissionSet.NO_PERMISSIONS,
+            0,
             user.effectiveName,
             Component.literal(user.effectiveName),
             server,

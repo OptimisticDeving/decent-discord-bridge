@@ -6,6 +6,7 @@ import dev.optimistic.decentdiscordbridge.component.StringToComponentConversion
 import dev.optimistic.decentdiscordbridge.util.StringExtensions.escapeDiscordSpecial
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.ClickEvent.Action.OPEN_URL
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import java.net.URI
@@ -41,7 +42,7 @@ object EnabledLinkResolver : AbstractLinkResolver(), StringToComponentConversion
             component.append(
                 Component.literal(match.value)
                     .withStyle(ChatFormatting.BLUE)
-                    .withStyle { it.withClickEvent(ClickEvent.OpenUrl(uri)) }
+                    .withStyle { it.withClickEvent(ClickEvent(OPEN_URL, uri.toString())) }
             )
         }
 

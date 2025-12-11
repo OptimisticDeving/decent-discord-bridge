@@ -1,6 +1,5 @@
 package dev.optimistic.decentdiscordbridge.mixin;
 
-import com.mojang.authlib.GameProfile;
 import dev.optimistic.decentdiscordbridge.DecentDiscordBridge;
 import dev.optimistic.decentdiscordbridge.bridge.AbstractBridge;
 import dev.optimistic.decentdiscordbridge.ducks.CachedAvatarUrlDuck;
@@ -28,8 +27,7 @@ public abstract class PlayerListMixin {
 
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
     private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
-        final GameProfile profile = player.getGameProfile();
-        ((CachedAvatarUrlDuck) (Object) profile).calculateAvatarUrl();
+        ((CachedAvatarUrlDuck) (Object) player).calculateAvatarUrl();
     }
 
     @Inject(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At("TAIL"))

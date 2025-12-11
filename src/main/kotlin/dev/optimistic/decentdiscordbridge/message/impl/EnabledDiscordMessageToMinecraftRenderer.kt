@@ -11,10 +11,12 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.Role
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.ClickEvent.Action.COPY_TO_CLIPBOARD
 import net.minecraft.network.chat.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentUtils
 import net.minecraft.network.chat.HoverEvent
+import net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT
 
 class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: AbstractLinkResolver) :
     DiscordMessageToMinecraftRenderer {
@@ -38,8 +40,8 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
                 .withStyle(ChatFormatting.ITALIC)
                 .withStyle {
                     it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW)
-                        .withHoverEvent(HoverEvent.ShowText(suggestMention))
-                        .withClickEvent(ClickEvent.CopyToClipboard(message.author.asMention))
+                        .withHoverEvent(HoverEvent(SHOW_TEXT, suggestMention))
+                        .withClickEvent(ClickEvent(COPY_TO_CLIPBOARD, message.author.asMention))
                 },
             linkResolver.resolveLinks(content).apply {
                 val hasAttachments = message.attachments.isNotEmpty()

@@ -13,7 +13,7 @@
     "issues": "https://github.com/OptimisticDeving/decent-discord-bridge/issues"
   },
   "license": "MIT",
-  "environment": "server",
+  "environment": "*",
   "mixins": [
     "decent-discord-bridge.mixins.json"
   ],

@@ -27,7 +27,7 @@ public abstract class PlayerListMixin {
     }
 
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
-    private void onPlayerLogin(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
+    private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
         final GameProfile profile = player.getGameProfile();
         ((CachedAvatarUrlDuck) (Object) profile).calculateAvatarUrl();
     }

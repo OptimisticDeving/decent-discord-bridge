@@ -10,6 +10,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
+    @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;loadStatusIcon()Ljava/util/Optional;"))
+    private void runServer(CallbackInfo ci) {
+        DecentDiscordBridge.Companion.getBridge()
+            .onStartup();
+    }
+
     @Inject(method = "stopServer", at = @At("TAIL"))
     private void stopServer(CallbackInfo ci) {
         if (!DecentDiscordBridge.Companion.isBridgeInitialized()) return;

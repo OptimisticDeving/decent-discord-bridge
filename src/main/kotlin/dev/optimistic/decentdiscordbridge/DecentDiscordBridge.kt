@@ -5,7 +5,7 @@ import dev.optimistic.decentdiscordbridge.bridge.impl.DisabledBridge
 import dev.optimistic.decentdiscordbridge.bridge.impl.EnabledBridge
 import me.lucko.configurate.toml.TOMLConfigurationLoader
 import net.minecraft.server.players.PlayerList
-import net.neoforged.fml.loading.FMLPaths
+import net.minecraftforge.fml.loading.FMLPaths
 import org.slf4j.LoggerFactory
 import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.kotlin.objectMapperFactory

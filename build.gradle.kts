@@ -1,14 +1,15 @@
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import net.fabricmc.loom.task.AbstractRemapJarTask
 
 plugins {
     kotlin("jvm") version "2.2.21"
-    id("fabric-loom") version "1.14-SNAPSHOT"
+    id("dev.architectury.loom") version "1.13-SNAPSHOT"
 }
 
 loom {
-    serverOnlyMinecraftJar()
+    forge {
+        mixinConfig("decent-discord-bridge.mixins.json")
+    }
 }
 
 group = "dev.optimistic"
@@ -18,21 +19,17 @@ val jij: Configuration by configurations.creating
 
 repositories {
     maven("https://maven.parchmentmc.org")
-    maven("https://maven.neoforged.net/releases")
     maven("https://thedarkcolour.github.io/KotlinForForge")
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.21.1")
+    minecraft("com.mojang:minecraft:1.20.1")
     mappings(loom.layered {
         officialMojangMappings()
         //parchment("org.parchmentmc.data:parchment-1.21.8:2025.07.20@zip")
     })
-    modImplementation("net.fabricmc:fabric-loader:0.18.2")
-    implementation("net.neoforged.fancymodloader:loader:4.0.42") {
-        isTransitive = false
-    }
-    implementation("thedarkcolour:kotlinforforge:5.10.0")
+    forge("net.minecraftforge:forge:1.20.1-47.4.13")
+    implementation("thedarkcolour:kotlinforforge:4.12.0")
 
     // config
     jij("org.spongepowered:configurate-core:4.2.0")
@@ -44,7 +41,11 @@ dependencies {
     }
 
     // discord
+    jij("com.squareup.okhttp3:okhttp-jvm:5.1.0") {
+        isTransitive = false // LexForge breaking everything as always
+    }
     jij("net.dv8tion:JDA:6.1.3") {
+        exclude(module = "okhttp-jvm")
         exclude(module = "slf4j-api")
         exclude(group = "org.jetbrains.kotlin")
 
@@ -92,10 +93,6 @@ tasks {
         options.encoding = "UTF-8"
     }
 
-    withType<AbstractRemapJarTask>().configureEach {
-        targetNamespace = "named"
-    }
-
     processResources {
         dependsOn(jij)
 
@@ -105,7 +102,7 @@ tasks {
             }
         }
 
-        filesMatching("META-INF/neoforge.mods.toml") {
+        filesMatching("META-INF/mods.toml") {
             expand("version" to project.version)
         }
 

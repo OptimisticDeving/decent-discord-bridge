@@ -8,7 +8,6 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +25,7 @@ public abstract class PlayerListMixin {
     }
 
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
-    private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
+    private void placeNewPlayer(Connection connection, ServerPlayer player, CallbackInfo ci) {
         ((CachedAvatarUrlDuck) (Object) player).calculateAvatarUrl();
     }
 

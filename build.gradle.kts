@@ -44,7 +44,7 @@ dependencies {
     }
 
     // discord
-    jij("net.dv8tion:JDA:5.6.1") {
+    jij("net.dv8tion:JDA:6.1.3") {
         exclude(module = "slf4j-api")
         exclude(group = "org.jetbrains.kotlin")
 

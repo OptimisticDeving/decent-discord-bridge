@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class ServerPlayerMixin implements CachedAvatarUrlDuck {
     @Override
     public String getAvatarUrl() {
-        return ((CachedAvatarUrlDuck)
+        return ((CachedAvatarUrlDuck) (Object)
                 (((ServerPlayer) (Object) this)
                         .getGameProfile()))
                 .getAvatarUrl();

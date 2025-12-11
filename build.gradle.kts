@@ -8,8 +8,8 @@ import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 
 plugins {
-    kotlin("jvm") version "2.2.10"
-    id("fabric-loom") version "1.11-SNAPSHOT"
+    kotlin("jvm") version "2.2.21"
+    id("fabric-loom") version "1.14-SNAPSHOT"
 }
 
 loom {
@@ -26,13 +26,13 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.21.8")
+    minecraft("com.mojang:minecraft:1.21.11")
     mappings(loom.layered {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-1.21.8:2025.07.20@zip")
+        //parchment("org.parchmentmc.data:parchment-1.21.8:2025.07.20@zip")
     })
-    modImplementation("net.fabricmc:fabric-loader:0.17.2")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.5+kotlin.2.2.10")
+    modImplementation("net.fabricmc:fabric-loader:0.18.2")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
 
     // config
     jij("org.spongepowered:configurate-core:4.2.0")

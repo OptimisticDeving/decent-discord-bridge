@@ -29,7 +29,7 @@ public abstract class PlayerListMixin {
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
     private void onPlayerLogin(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
         final GameProfile profile = player.getGameProfile();
-        ((CachedAvatarUrlDuck) profile).calculateAvatarUrl();
+        ((CachedAvatarUrlDuck) (Object) profile).calculateAvatarUrl();
     }
 
     @Inject(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At("TAIL"))

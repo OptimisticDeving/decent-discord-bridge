@@ -37,7 +37,7 @@ class EnabledDiscordMessageToMinecraftRenderer(private val linkResolver: Abstrac
             )
                 .withStyle(ChatFormatting.ITALIC)
                 .withStyle {
-                    it.withColor(member?.colorRaw ?: Role.DEFAULT_COLOR_RAW)
+                    it.withColor(member?.colors?.primaryRaw ?: Role.DEFAULT_COLOR_RAW)
                         .withHoverEvent(HoverEvent.ShowText(suggestMention))
                         .withClickEvent(ClickEvent.CopyToClipboard(message.author.asMention))
                 },

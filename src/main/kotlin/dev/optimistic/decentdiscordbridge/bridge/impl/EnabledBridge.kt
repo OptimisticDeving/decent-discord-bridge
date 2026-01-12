@@ -1,10 +1,5 @@
 package dev.optimistic.decentdiscordbridge.bridge.impl
 
-import club.minnced.discord.webhook.WebhookClientBuilder
-import club.minnced.discord.webhook.external.JDAWebhookClient
-import club.minnced.discord.webhook.receive.ReadonlyMessage
-import club.minnced.discord.webhook.send.AllowedMentions
-import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mojang.authlib.GameProfile
@@ -32,11 +27,15 @@ import dev.optimistic.decentdiscordbridge.message.impl.EnabledDiscordMessageToMi
 import dev.optimistic.decentdiscordbridge.util.MessageExtensions.hasContent
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.IncomingWebhookClient
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.UserSnowflake
+import net.dv8tion.jda.api.entities.WebhookClient
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.utils.MemberCachePolicy
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.PlayerChatMessage
 import net.minecraft.server.level.ServerPlayer
@@ -57,7 +56,7 @@ class EnabledBridge(
     private val logger = LoggerFactory.getLogger("decent-discord-bridge")
     private val discordRegex: Regex = Regex("([Dd])[Ii]([Ss][Cc][Oo][Rr][Dd])")
 
-    private val allowedMentions: AllowedMentions = config.mentions.intoJda()
+    private val mentionConfig: Configuration.MentionConfiguration = config.mentions
     private val filter: FilterRenderer = when (config.applyFilterToWebhookMessages) {
         true -> AppliedFilterRenderer
         false -> NoOpFilterRenderer
@@ -68,7 +67,7 @@ class EnabledBridge(
         USERNAME -> UsernameArgumentUrlGenerator(config.playerAvatars.template)
     }
 
-    private val webhook: JDAWebhookClient
+    private val webhook: IncomingWebhookClient
     private val jda: JDA
     private val mentionResolver: AbstractMentionResolver
     private val seenUsers: MutableSet<Long> = if (Files.notExists(seenUsersPath))
@@ -81,14 +80,12 @@ class EnabledBridge(
     override val messageRenderer: DiscordMessageToMinecraftRenderer
 
     init {
-        logger.info("Building webhook...")
-        webhook = WebhookClientBuilder(config.webhookId, config.webhookToken)
-            .setDaemon(true) // prevents blocking shutdown
-            .buildJDA()
-
         logger.info("Logging into Discord...")
         val (jda, guild) = startClient(token = config.token, channelId = config.channelId)
         this.jda = jda
+
+        logger.info("Building webhook...")
+        webhook = WebhookClient.createClient(this.jda, config.webhookId.toString(), config.webhookToken)
 
         mentionResolver = if (config.mentions.users.allowed) {
             EnabledMentionResolver(guild, mentionFilter = config.mentions.users.asMentionFilter())
@@ -178,13 +175,13 @@ class EnabledBridge(
         return urlGenerator.generateAvatarUrl(profile)
     }
 
-    private fun sendSystemInternal(message: Component) = webhook.send(
-        WebhookMessageBuilder()
-            .setUsername("System")
+    private fun sendSystemInternal(message: Component) = webhook.sendMessage(
+        MessageCreateBuilder()
             .setContent(linkResolver.escapeNotLinks(message.string))
             .setAllowedMentions(emptyMentions)
-            .build()
-    )
+            .build())
+        .setUsername("System")
+        .submit()
 
 
     override fun sendSystem(message: Component) {
@@ -194,7 +191,7 @@ class EnabledBridge(
     private fun sendPlayerInternal(
         player: ServerPlayer,
         message: PlayerChatMessage
-    ): CompletableFuture<ReadonlyMessage> {
+    ): CompletableFuture<Message> {
         val filtered = this.filter.renderFilter(message)?.trim()
         if (filtered === null)
             return completelyFiltered // don't send fully filtered messages over the discord bridge
@@ -202,16 +199,14 @@ class EnabledBridge(
         if (filtered.isEmpty())
             return emptyMessage
 
-        return webhook.send(
-            WebhookMessageBuilder()
-                .setUsername(player.gameProfile.name.replace(discordRegex, "$1!$2"))
-                .setAvatarUrl((player as CachedAvatarUrlDuck).getAvatarUrl())
-                .setContent(
-                    linkResolver.escapeNotLinks(mentionResolver.resolveMentionsInString(filtered))
-                )
-                .setAllowedMentions(allowedMentions)
-                .build()
-        )
+        return webhook.sendMessage(
+            MessageCreateBuilder()
+                .setContent(linkResolver.escapeNotLinks(mentionResolver.resolveMentionsInString(filtered)))
+                .apply { this@EnabledBridge.mentionConfig.apply(this) }
+                .build())
+            .setUsername(player.gameProfile.name.replace(discordRegex, "$1!$2"))
+            .setAvatarUrl((player as CachedAvatarUrlDuck).getAvatarUrl())
+            .submit()
     }
 
     override fun sendPlayer(player: ServerPlayer, message: PlayerChatMessage) {
@@ -228,17 +223,16 @@ class EnabledBridge(
     }
 
     override fun onShutdown() {
-        jda.shutdown()
-        jda.awaitShutdown(30, TimeUnit.SECONDS)
         if (broadcastLifecycleEvents) {
             try {
-                sendSystemInternal(Component.literal("Server has stopped")).get(15, TimeUnit.SECONDS)
+                sendSystemInternal(Component.literal("Server has stopped"))
             } catch (ex: Throwable) {
                 logger.warn("Failed to send shutdown message", ex)
             }
         }
 
-        webhook.close()
+        jda.shutdown()
+        jda.awaitShutdown(30, TimeUnit.SECONDS)
 
         val writer = Files.newBufferedWriter(seenUsersPath)
         synchronized(seenUsers) {
@@ -248,12 +242,12 @@ class EnabledBridge(
     }
 
     private companion object {
-        private val emptyMentions = AllowedMentions.none()
+        private val emptyMentions = emptyList<Message.MentionType>()
         private val gson = Gson()
 
         private val completelyFiltered =
-            CompletableFuture.failedFuture<ReadonlyMessage>(IllegalArgumentException("completely filtered message"))
+            CompletableFuture.failedFuture<Message>(IllegalArgumentException("completely filtered message"))
         private val emptyMessage =
-            CompletableFuture.failedFuture<ReadonlyMessage>(IllegalArgumentException("empty message"))
+            CompletableFuture.failedFuture<Message>(IllegalArgumentException("empty message"))
     }
 }

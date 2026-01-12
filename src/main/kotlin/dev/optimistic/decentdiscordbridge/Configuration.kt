@@ -1,8 +1,9 @@
 package dev.optimistic.decentdiscordbridge
 
-import club.minnced.discord.webhook.send.AllowedMentions
 import dev.optimistic.decentdiscordbridge.mention.filter.impl.PassthroughMentionFilter
 import dev.optimistic.decentdiscordbridge.mention.filter.impl.RestrictedMentionFilter
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
@@ -42,24 +43,16 @@ data class Configuration(
     ) {
         @ConfigSerializable
         data class SnowflakeMentions(val allowed: Boolean = false, val only: Set<Long> = emptySet()) {
+            val snowflakes = only.map { it.toString() }.toTypedArray()
+
             fun apply(
-                allowedMentions: AllowedMentions,
-                setParse: (Boolean) -> Unit,
+                builder: MessageCreateBuilder,
                 setSnowflakes: (Array<String>) -> Unit
-            ): AllowedMentions {
-                if (!allowed) {
-                    setParse(false)
-                    return allowedMentions
-                }
+            ): MessageCreateBuilder {
+                if (!allowed || only.isEmpty()) return builder
+                setSnowflakes(snowflakes)
 
-                if (only.isEmpty()) {
-                    setParse(true)
-                } else {
-                    setParse(false)
-                    setSnowflakes(only.map { it.toString() }.toTypedArray())
-                }
-
-                return allowedMentions
+                return builder
             }
 
             fun asMentionFilter() = if (only.isEmpty()) {
@@ -69,9 +62,17 @@ data class Configuration(
             }
         }
 
-        fun intoJda() = AllowedMentions()
-            .withParseEveryone(this.everyone)
-            .run { roles.apply(this, this::withParseRoles, this::withRoles) }
-            .run { users.apply(this, this::withParseUsers, this::withUsers) }
+        private val allowedMentions = buildList {
+            val config = this@MentionConfiguration
+
+            if (config.everyone) add(Message.MentionType.EVERYONE)
+            if (config.roles.allowed) add(Message.MentionType.ROLE)
+            if (config.users.allowed) add(Message.MentionType.USER)
+        }
+
+        fun apply(builder: MessageCreateBuilder) = builder
+            .setAllowedMentions(allowedMentions)
+            .run { roles.apply(this, this::mentionRoles) }
+            .run { users.apply(this, this::mentionUsers) }
     }
 }

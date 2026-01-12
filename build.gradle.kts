@@ -8,7 +8,7 @@ import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.3.0"
     id("fabric-loom") version "1.14-SNAPSHOT"
 }
 
@@ -31,8 +31,8 @@ dependencies {
         officialMojangMappings()
         //parchment("org.parchmentmc.data:parchment-1.21.8:2025.07.20@zip")
     })
-    modImplementation("net.fabricmc:fabric-loader:0.18.2")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
+    modImplementation("net.fabricmc:fabric-loader:0.18.4")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.8+kotlin.2.3.0")
 
     // config
     jij("org.spongepowered:configurate-core:4.2.0")
@@ -44,7 +44,7 @@ dependencies {
     }
 
     // discord
-    jij("net.dv8tion:JDA:6.1.3") {
+    jij("net.dv8tion:JDA:6.3.0") {
         exclude(module = "slf4j-api")
         exclude(group = "org.jetbrains.kotlin")
 
@@ -52,12 +52,8 @@ dependencies {
         exclude(module = "opus-java")
         exclude(module = "tink")
     }
-    jij("club.minnced:jda-ktx:0.12.0") {
+    jij("club.minnced:jda-ktx:0.14.0") {
         isTransitive = false
-    }
-    jij("club.minnced:discord-webhooks:0.8.4") {
-        exclude(module = "slf4j-api")
-        exclude(group = "org.jetbrains.kotlin")
     }
 }
 

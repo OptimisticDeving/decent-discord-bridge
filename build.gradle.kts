@@ -97,6 +97,7 @@ tasks {
             val fileOutputStream = BufferedOutputStream(Files.newOutputStream(path))
             val jarOutputStream = JarOutputStream(fileOutputStream)
             var entry = inputStream.nextJarEntry
+            jarOutputStream.setLevel(0)
 
             while (entry != null) {
                 jarOutputStream.putNextEntry(entry as ZipEntry)
